@@ -1,0 +1,37 @@
+version: "3.7"
+
+services:
+
+  server:
+    container_name: democart_server
+    build: ./go/src/democart/.
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db  # TODO(sam): add psql secrets to config and support config file
+    restart: unless-stopped
+
+  db:
+    container_name: democart_db
+    image: postgres:11
+    restart: always
+    environment:
+      POSTGRES_USER: democart
+      POSTGRES_PASSWORD_FILE: /run/secrets/pgpass
+    secrets:
+      - pgpass
+    volumes:
+      - ./go/src/democart/postgres/data:/var/lib/postgresql/data
+      - ./go/src/democart/postgres/pg_hba.conf:/usr/share/postgres/pg_hba.conf
+    ports:
+      - "5431:5432"
+
+  web:
+    container_name: democart_web
+    build: ./web/democart/.
+    ports:
+      - "3000:80"
+
+secrets:
+  pgpass:
+    file: ./go/src/democart/postgres/pgpass

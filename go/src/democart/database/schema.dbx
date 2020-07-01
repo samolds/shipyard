@@ -1,0 +1,293 @@
+///////////////////////////////////////////////////////////////////////////////
+// Email/Password - stores password login info. can be replaced with a
+//                  separate identity provider, like Auth0.
+///////////////////////////////////////////////////////////////////////////////
+model email_password (
+  key    pk
+  unique email
+
+  field pk               serial64
+  field email            text       ( updatable )
+  field password_hash    blob       ( updatable )
+  field created          utimestamp ( autoinsert )
+  field passowrd_updated utimestamp ( autoinsert, updatable )
+  field last_login       utimestamp ( autoinsert, autoupdate )
+  field code             text       ( updatable )
+)
+
+create email_password ( noreturn )
+
+update email_password ( where email_password.pk = ?, noreturn )
+
+read scalar (
+  select email_password
+  where  email_password.email = ?
+  where  email_password.password_hash = ?
+)
+
+read scalar (
+  select email_password
+  where  email_password.code = ?
+  where  email_password.last_login > ?
+)
+
+
+///////////////////////////////////////////////////////////////////////////////
+// User - stores basic information for a user
+///////////////////////////////////////////////////////////////////////////////
+model user (
+  key    pk
+  unique id
+  unique email
+  
+  field pk      serial64
+  field id      text
+  field email   text       ( updatable )
+  field created utimestamp ( autoinsert )
+
+  field profile_url text
+  field full_name   text
+)
+
+create user ()
+read scalar ( select user, where user.email = ? )
+read scalar ( select user, where user.id = ? )
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Session - stores authentication session information from the identity
+//           provider for each user
+///////////////////////////////////////////////////////////////////////////////
+model session (
+  key    pk
+  unique id
+  unique id_token
+  unique access_token
+  unique refresh_token
+
+  field pk                  serial64
+  field id                  text
+  field created             utimestamp ( autoinsert )
+  field id_token            text
+  field access_token        text
+  field refresh_token       text
+  field access_token_expiry utimestamp
+  field device_name         text
+
+  field user_pk user.pk cascade ( nullable )
+)
+
+create session ()
+
+read scalar (
+  select user
+	join   user.pk = session.user_pk
+	where  session.id = ?
+)
+
+read scalar (
+  select user
+	join   user.pk = session.user_pk
+	where  session.access_token = ?
+)
+
+read all (
+  select session
+	join   session.user_pk = user.pk
+	where  user.id = ?
+  orderby desc session.created
+)
+
+read scalar (
+  select session
+  where  session.access_token = ?
+)
+
+delete session ( where session.pk = ? )
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Address - physical address for where the items should be delivered
+///////////////////////////////////////////////////////////////////////////////
+model address (
+  key    pk
+  unique id
+
+  field pk      serial64
+  field id      text
+  field created utimestamp ( autoinsert )
+
+  field line1   text
+  field line2   text
+  field line3   text
+  field country text
+  field state   text
+  field city    text
+  field zip     text
+  field phone   text
+  field notes   text
+
+  field user_pk user.pk setnull ( nullable )
+)
+
+create address ()
+
+read one (
+  select address
+  where address.id = ?
+)
+
+read all (
+  select address
+  where  address.user_pk = ?
+)
+
+read all (
+  select address
+  join   address.user_pk = user.pk
+  where  user.id = ?
+)
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Item - things for sale in the marketplace
+///////////////////////////////////////////////////////////////////////////////
+model item (
+  key    pk
+  unique id
+
+  field pk                 serial64
+  field id                 text
+  field created            utimestamp ( autoinsert )
+  field price              int        ( updatable )
+  field description        text       ( updatable )
+  field image_url          text       ( updatable )
+  field remaining_quantity int        ( updatable )
+
+  field owning_user_pk user.pk setnull ( nullable )
+)
+
+create item ()
+
+update item ( where item.pk = ? )
+update item ( where item.pk = ?, noreturn )
+update item ( where item.id = ?, where item.owning_user_pk = ? )
+
+read all (
+  select item
+  orderby desc item.created
+  suffix item
+)
+
+read all (
+  select item
+  where  item.remaining_quantity = 0
+
+  orderby desc item.created
+  suffix unavailable item
+)
+
+read all (
+  select item
+  where  item.remaining_quantity > 0
+
+  orderby desc item.created
+  suffix available item
+)
+
+read one (
+  select item
+  where  item.pk = ?
+)
+
+read scalar (
+  select item
+  where  item.id = ?
+  where  item.remaining_quantity >= ?
+)
+
+read all (
+  select item
+  where  item.remaining_quantity > 0
+  where  item.created  >= ?
+)
+
+read all (
+  select item
+  join   item.owning_user_pk = user.pk
+  where  item.remaining_quantity > 0
+  where  user.id = ?
+)
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Cart Item - items that a user is about to purchase
+///////////////////////////////////////////////////////////////////////////////
+model cart_item (
+  key    pk
+  unique id
+  unique user_pk item_pk
+
+  field pk       serial64
+  field id       text
+  field created  utimestamp ( autoinsert )
+  field quantity int        ( updatable )
+
+  field user_pk    user.pk    setnull ( nullable )
+  field item_pk    item.pk    setnull ( nullable )
+)
+
+create cart_item ( noreturn )
+
+read all (
+  select cart_item item.id
+  join   cart_item.user_pk = session.user_pk
+  join   cart_item.item_pk = item.pk
+  where  session.id = ?
+
+	orderby desc cart_item.created
+  suffix cart_item item_id by session_id
+)
+
+read one scalar (
+  select cart_item
+  join   cart_item.item_pk = item.pk
+  where  item.id = ?
+  where  cart_item.user_pk = ?
+)
+
+update cart_item ( where cart_item.pk = ? )
+update cart_item ( where cart_item.pk = ?, noreturn )
+delete cart_item ( where cart_item.pk = ? )
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Ordered Item - items that a user has purchased
+///////////////////////////////////////////////////////////////////////////////
+model ordered_item (
+  key    pk
+  unique id
+
+  field pk        serial64
+  field id        text
+  field created   utimestamp ( autoinsert )
+  field quantity  int
+  field delivered bool
+  field price     int
+
+  field user_pk    user.pk    setnull ( nullable )
+  field item_pk    item.pk    restrict
+  field address_pk address.pk restrict
+)
+
+create ordered_item ( noreturn )
+read all (
+  select ordered_item address.id item.id
+  join   ordered_item.user_pk = session.user_pk
+  join   ordered_item.address_pk = address.pk
+  join   ordered_item.item_pk = item.pk
+  where  session.id = ?
+
+	orderby desc ordered_item.delivered ordered_item.created
+  suffix ordered_item address_id item_id by session_id
+)
