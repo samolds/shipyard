@@ -8,9 +8,9 @@ RUN apt-get update && apt-get install -y sqlite3
 # setup
 WORKDIR /usr/local/src/democart
 COPY go.mod go.sum Makefile ./
-RUN make setup
+RUN make setup-no-dbx
 COPY . .
-RUN make test server
+RUN make test-no-dbx server-no-dbx
 
 
 FROM debian:stretch AS runner
@@ -26,6 +26,6 @@ COPY --from=builder /usr/local/src/democart/democart /usr/local/bin/democart
 
 #CMD [ "/usr/local/bin/waitforpsql.sh", \
 CMD [ "/usr/local/bin/democart", \
-  "--config", "/etc/democart/config.hcl" ]
+  "--configs", "/etc/democart/config.hcl" ]
 
 EXPOSE 8080

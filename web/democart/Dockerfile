@@ -12,5 +12,6 @@ RUN npm run build
 
 FROM nginx:stable-alpine
 COPY --from=builder /app/build /usr/share/nginx/html
+COPY --from=builder /app/sed_env_vars.sh /usr/local/bin/sed_env_vars.sh
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["sh", "-c", "sed_env_vars.sh /usr/share/nginx/html && nginx -g 'daemon off;'"]

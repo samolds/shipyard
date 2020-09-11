@@ -1,0 +1,74 @@
+# configurations for database pods
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: democart-db-configmap
+  namespace: dev
+data:
+  POSTGRES_DB: dbconfigmapdb
+  POSTGRES_USER: dbconfigmapuser
+  POSTGRES_PASSWORD: dbconfigmappass
+
+---
+
+# a deployment for the databse (normally, this WOULD NOT live within the k8s
+# cluster. it would be it's own separate thing and only a database service
+# would be defined to communicate with an external service)
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: democart-db-statefulset
+  namespace: dev
+  labels:
+    app: democart-db
+spec:
+  serviceName: democart-db
+  replicas: 1
+  selector:
+    matchLabels:
+      app: democart-db
+  #strategy:
+  #  type: Recreate
+  template:
+    metadata:
+      labels:
+        app: democart-db
+    spec:
+      containers:
+      - name: democart-db-docker
+        image: postgres:11
+        ports:
+        - containerPort: 5432
+        envFrom:
+        - configMapRef:
+            name: democart-db-configmap
+        - secretRef:
+            name: democart-db-secret
+        volumeMounts:
+        - name: democart-persistent-storage
+          mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: democart-persistent-storage
+        persistentVolumeClaim:
+          claimName: democart-db-persistentvolumeclaim
+
+---
+
+# abstraction to expose database pod
+apiVersion: v1
+kind: Service
+metadata:
+  name: democart-db-service
+  namespace: dev
+  labels:
+    app: democart-db
+spec:
+  selector:
+    app: democart-db
+  # db is only available within the cluster
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 5432 # the exposed port
+    targetPort: 5432 # the port within the container psql is listening on
+    protocol: TCP

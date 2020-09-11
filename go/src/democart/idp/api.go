@@ -128,8 +128,6 @@ func (i *IDP) complete(ctx context.Context, w http.ResponseWriter,
 	password := r.FormValue("password")
 	pwdHash := i.passwordHash(password)
 
-	// TODO(sam): why is a whole bunch of extra stuff getting nested here. is
-	// there a global value getting mutated??
 	redirectURIRaw, err := url.Parse(r.URL.Query().Get("redirect_uri"))
 	if err != nil {
 		return nil, he.Unexpected.Wrap(err)
@@ -152,7 +150,6 @@ func (i *IDP) complete(ctx context.Context, w http.ResponseWriter,
 	}
 
 	// build the redirect with the code
-	// TODO(sam): include the redirect back to the backend server
 	q.Set("code", code)
 	q.Set("state", r.URL.Query().Get("state"))
 

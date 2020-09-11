@@ -2,12 +2,12 @@ package server
 
 import (
 	"net/http"
-	"net/url"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
 
+	"democart/config"
 	"democart/database"
 	h "democart/handler"
 	"democart/idp"
@@ -17,27 +17,18 @@ var (
 	fakeIDPPath = "/fakeidp"
 )
 
-type Config struct {
-	IDPPasswordSalt string
-	IDPClientID     string
-	IDPClientSecret string
-	ServerURL       *url.URL
-	DeveloperMode   bool
-	ClientHosts     []*url.URL
-}
-
 type Server struct {
 	DB     *database.DB
 	router http.Handler
-	Config *Config
+	Config *config.Configs
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.router.ServeHTTP(w, r)
 }
 
-func New(db *database.DB, config *Config) *Server {
-	s := &Server{DB: db, Config: config}
+func New(db *database.DB, configs *config.Configs) *Server {
+	s := &Server{DB: db, Config: configs}
 	s.router = router(s)
 	return s
 }
@@ -94,8 +85,38 @@ func router(s *Server) http.Handler {
 	// something real, like Auth0. All that's needed is to redirect to a proper
 	// idp instead of this one, and make sure to include the necessary client
 	// ids/secrets/etc.
+	//
+	// TODO(sam): break this out to a completely different server listening on a
+	// different port and provide exposed public url config too
 	idpRoutes := idp.New(s.Config.IDPPasswordSalt, s.DB)
 	r.Mount(fakeIDPPath, idpRoutes)
 
 	return r
+}
+
+// NewHTTPServer constructs a new http.Server to listen for connections and
+// serve responses as defined by the Server's ServeHTTP defined above.
+func NewHTTPServer(configs *config.Configs) (*http.Server, error) {
+	//metricMiddleware h.MiddlewareWrapper) (*http.Server, error) {
+
+	// TODO(sam): pass through database configs
+	db, err := database.Connect(configs.DBURL, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var apiHandler http.Handler
+	apiHandler = New(db, configs)
+
+	//if metricMiddleware != nil {
+	//	apiHandler = metricMiddleware(apiHandler)
+	//}
+
+	return &http.Server{
+		Addr:         configs.APIAddress,
+		WriteTimeout: configs.WriteTimeout,
+		ReadTimeout:  configs.ReadTimeout,
+		IdleTimeout:  configs.IdleTimeout,
+		Handler:      apiHandler,
+	}, nil
 }

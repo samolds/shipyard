@@ -4,14 +4,24 @@ services:
 
   server:
     container_name: democart_server
-    build: ./go/src/democart/.
+    build:
+      context: ./go/src/democart
+      dockerfile: Dockerfile
     ports:
       - "8080:8080"
     depends_on:
-      - db  # TODO(sam): add psql secrets to config and support config file
+      - db
+    environment:
+      DATABASE_DRIVER: postgres
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_SSLMODE: disable
+      DATABASE_USER: democart
+      DATABASE_PASSWORD: democartpass
+      DATABASE_NAME: democart
     restart: unless-stopped
 
-  db:
+  db: # TODO(sam): remove for prod and replace with rds
     container_name: democart_db
     image: postgres:11
     restart: always
@@ -28,9 +38,80 @@ services:
 
   web:
     container_name: democart_web
-    build: ./web/democart/.
+    build:
+      context: ./web/democart
+      dockerfile: Dockerfile
+    environment:
+      BACKEND_ADDRESS: "http://localhost:8080"
     ports:
       - "3000:80"
+
+#  nginx_proxy:
+#    build: ./nginx
+#    container_name: democart_nginx_proxy
+#    restart: always
+#    ports:
+#      - 443:443
+#      - 80:80
+#    depends_on:
+#      - server
+#    volumes:
+#      - assets_volume:/usr/democart/go/src/democart/static/assets
+#      - filestore_volume:/usr/democart/go/src/democart/static/filestore
+#      - certs:/etc/nginx/certs
+#      - html:/usr/share/nginx/html
+#      - vhost:/etc/nginx/vhost.d
+#      - /var/run/docker.sock:/tmp/docker.sock:ro
+#
+#  nginx_proxy_letsencrypt:
+#    container_name: democart_nginx_proxy_letsencrypt
+#    image: jrcs/letsencrypt-nginx-proxy-companion
+#    environment:
+#      DEFAULT_EMAIL: youremail@yourdomain.com
+#      NGINX_PROXY_CONTAINER: nginx_proxy
+#    volumes:
+#      - /var/run/docker.sock:/var/run/docker.sock:ro
+#      - certs:/etc/nginx/certs
+#      - html:/usr/share/nginx/html
+#      - vhost:/etc/nginx/vhost.d
+#    depends_on:
+#      - nginx_proxy
+#
+#  redis:
+#    # TODO(sam): use redis:buster?
+#    image: redis:alpine
+#    container_name: democart_redis
+#    ports:
+#     - "6379:6379"
+#
+#  grafana:
+#    image: grafana/grafana
+#    container_name: democart_grafana
+#    ports:
+#      - "3000:3000"
+#    volumes:
+#      - ./monitor/grafana_data:/var/lib/grafana
+#      - ./monitor/grafana/provisioning/:/etc/grafana/provisioning/
+#    restart: always
+#
+#  prometheus:
+#    image: prom/prometheus:v2.1.0
+#    container_name: democart_prometheus
+#    volumes:
+#      - ./monitor/prometheus.yml:/etc/prometheus/prometheus.yml
+#      - prom/prometheus
+#    command:
+#      - '--config.file=/etc/prometheus/prometheus.yml'
+#    ports:
+#      - 9090:9090
+
+volumes:
+  postgres_data:
+  #  assets_volume:
+  #  filestore_volume:
+  #  certs:
+  #  html:
+  #  vhost:
 
 secrets:
   pgpass:

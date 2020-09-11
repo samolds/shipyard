@@ -1,0 +1,164 @@
+# configurations for backend pods
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: democart-backend-configmap
+  namespace: dev
+data:
+  DATABASE_DRIVER: "postgres"
+  DATABASE_HOST: "democart-db-service"
+  DATABASE_PORT: "5432"
+  DATABASE_SSLMODE: "disable"
+  DATABASE_NAME: "dbconfigmapdb"
+  DATABASE_USER: "dbconfigmapuser"
+  DATABASE_PASSWORD: "dbconfigmappass"
+
+  config.hcl: |
+    api_slug = "democart"
+    api_addr = ":8080"
+    graceful_shutdown_timeout_sec = 5
+    write_timeout_sec = 15
+    read_timeout_sec = 15
+    idle_timeout_sec = 15
+    idp_password_salt = "00000"
+    idp_client_id = "idp_client_id"
+    idp_client_secret = "idp_client_secret"
+    loglevel = "debug"
+    developer_mode = true
+    exposed_url = "http://api.helloworld.info"
+    client_hosts = ["http://helloworld.info"]
+
+---
+
+# template to define backend pods
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: democart-backend-deployment
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app: democart-backend
+      #tier: backend
+  template:
+    metadata:
+      labels:
+        app: democart-backend
+        #tier: backend
+    spec:
+      # to copy minikube hosts /etc/hosts to each pod (so that
+      # api.helloworld.info can be resolved from within the pods)
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+      - name: democart-backend-docker
+        image: "samolds/democart-api:latest"
+        command: ["/usr/local/bin/democart"]
+        args: ["--configs", "/etc/config/democart_backend/config.hcl,/etc/config/democart_backend/secrets.hcl"]
+        ports:
+        - containerPort: 8080
+          name: api
+        #- containerPort: 8081
+        #  name: idp
+        #- containerPort: 8082
+        #  name: metrics
+        envFrom:
+        - configMapRef:
+            name: democart-backend-configmap
+        - secretRef:
+            name: democart-backend-secret
+        env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 2
+            memory: 200Mi
+        livenessProbe: # TODO(sam): review this
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 200
+          periodSeconds: 30
+          timeoutSeconds: 15
+        readinessProbe: # TODO(sam): review this
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 10
+          timeoutSeconds: 10
+        volumeMounts:
+        - name: democart-backend-config
+          mountPath: /etc/config/democart_backend
+          readOnly: true
+      volumes:
+      - name: democart-backend-config
+        projected:
+          sources:
+          - configMap:
+              name: democart-backend-configmap
+          - secret:
+              name: democart-backend-secret
+      initContainers:
+      - name: democart-backend-init-db
+        image: busybox
+        command: ['sh', '-c', 'until nc -z democart-db-service 5432; do echo waiting for db; sleep 2; done;']
+  # shouldn't be necessary with hpa
+  #replicas: 3
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: # TODO(sam): review this
+      maxSurge: 3
+      maxUnavailable: 0
+
+---
+
+# abstraction to expose backend pods
+apiVersion: v1
+kind: Service
+metadata:
+  name: democart-backend-service
+  namespace: dev
+spec:
+  selector:
+    app: democart-backend
+  type: LoadBalancer
+  ports:
+  - name: http
+    port: 8000 # the exposed port. what web is pointing to in package.json
+    targetPort: 8080 # containerPort. where the container is listening
+    protocol: TCP
+  #- name: http
+  #  port: 8001 # the exposed port. what web is pointing to in package.json
+  #  targetPort: 8081 # containerPort. where the container is listening
+  #  protocol: TCP
+  #- name: http
+  #  port: 8002 # the exposed port. what web is pointing to in package.json
+  #  targetPort: 8082 # containerPort. where the container is listening
+  #  protocol: TCP
+
+
+## unavailable with minikube
+#---
+#
+## service to dynamically scale backend pods
+#apiVersion: autoscaling/v1
+#kind: HorizontalPodAutoscaler
+#metadata:
+#  name: democart-backend-autoscaler
+#  namespace: dev
+#spec:
+#  maxReplicas: 3
+#  minReplicas: 1
+#  scaleTargetRef:
+#    apiVersion: apps/v1
+#    kind: Deployment
+#    name: democart-backend-deployment
+#  targetCPUUtilizationPercentage: 90
