@@ -6,8 +6,14 @@ VERSION = "alpha"
 server: generate
 	go build -ldflags "-X main.version=$(VERSION)" -o ./democart .
 
+server-no-dbx:
+	go build -ldflags "-X main.version=$(VERSION)" -o ./democart .
+
 setup:
 	go get gopkg.in/spacemonkeygo/dbx.v1 && go mod download
+
+setup-no-dbx:
+	go mod download
 
 generate: database/schema.dbx.go
 	go generate ./database
@@ -15,11 +21,14 @@ generate: database/schema.dbx.go
 test: generate
 	go test -count=1 ./...
 
+test-no-dbx:
+	go test -count=1 ./...
+
 run: generate test server
-	./democart --loglevel debug --config config.hcl
+	./democart --loglevel debug --configs config.hcl
 
 runsqlite3: generate test server
-	./democart --loglevel debug --config config.hcl \
+	./democart --loglevel debug --configs config.hcl \
 		--db_url "sqlite3:democart.sqlite3.db?sslmode=disable"
 
 clean:

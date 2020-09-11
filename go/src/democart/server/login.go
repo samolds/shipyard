@@ -17,11 +17,15 @@ import (
 	"democart/util"
 )
 
+func (s *Server) ExposedAPIURL() url.URL {
+	exposed_url_copy, _ := url.Parse(s.Config.ExposedURL.String())
+	return *exposed_url_copy
+}
+
+// TODO(sam): the idp url should be provided as a config flag so that it can
+// live totally separately
 func (s *Server) idpURL(next string) string {
-	// TODO(sam): this should be composed from the request url, not the config
-	// server url. this is because the exposed route (in docker) might be
-	// different than what url is provided in the config
-	root, _ := url.Parse(s.Config.ServerURL.String())
+	root := s.ExposedAPIURL()
 	root.Path = path.Join(root.Path, fakeIDPPath, next)
 	return root.String()
 }
@@ -108,14 +112,7 @@ func (s *Server) SignupComplete(ctx context.Context, w http.ResponseWriter,
 func (s *Server) beginAuth(ctx context.Context, w http.ResponseWriter,
 	r *http.Request, idpURI, finalRedirectURI string) (interface{}, error) {
 
-	// TODO(sam): this should be composed from the request url, not the config
-	// server url. this is because the exposed route (in docker) might be
-	// different than what url is provided in the config
-	codeExchanger, err := url.Parse(s.Config.ServerURL.String())
-	if err != nil {
-		return nil, he.Unexpected.Wrap(err)
-	}
-
+	codeExchanger := s.ExposedAPIURL()
 	codeExchanger.Path = path.Join(finalRedirectURI)
 	codeExchange := codeExchanger.String()
 	referrer := r.Header.Get("referer")

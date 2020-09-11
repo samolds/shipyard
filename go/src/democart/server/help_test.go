@@ -12,6 +12,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"democart/config"
 	"democart/database"
 	"democart/util"
 )
@@ -30,11 +31,10 @@ func newServerTest(t *testing.T) (context.Context, *serverTest) {
 	assert.NoError(t, err)
 	testDB, err := database.Connect(testDBURL, nil)
 	assert.NoError(t, err)
-	c := &Config{
+	c := &config.Configs{
 		IDPPasswordSalt: "salt",
 		IDPClientID:     "idpid",
 		IDPClientSecret: "idpsecret",
-		ServerURL:       nil,
 		DeveloperMode:   false,
 		ClientHosts:     nil,
 	}

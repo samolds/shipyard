@@ -1,0 +1,9 @@
+location /assets/ {
+  alias /var/lib/democart/static/assets/;
+  add_header Access-Control-Allow-Origin *;
+}
+
+location /filestore/ {
+  alias /var/lib/democart/static/filestore/;
+  add_header Access-Control-Allow-Origin *;
+}

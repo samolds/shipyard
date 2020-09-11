@@ -1,0 +1,51 @@
+# ingress to route frontend and backend traffic
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: democart-ingress
+  namespace: dev
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+  rules:
+  - host: helloworld.info
+    http:
+      paths:
+      # https://github.com/kubernetes/ingress-nginx/issues/5265#issuecomment-612680524
+      - path: /?(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: democart-frontend-service
+            port:
+              number: 3000
+  - host: api.helloworld.info
+    http:
+      paths:
+      - path: /?(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: democart-backend-service
+            port:
+              number: 8000
+  #- host: idp.helloworld.info
+  #  http:
+  #    paths:
+  #    - path: /?(.*)
+  #      pathType: Prefix
+  #      backend:
+  #        service:
+  #          name: democart-backend-service
+  #          port:
+  #            number: 8001
+  #- host: metrics.helloworld.info
+  #  http:
+  #    paths:
+  #    - path: /?(.*)
+  #      pathType: Prefix
+  #      backend:
+  #        service:
+  #          name: democart-backend-service
+  #          port:
+  #            number: 8002

@@ -1,5 +1,7 @@
 package handler
 
+import "net/http"
+
 // TODO(sam): figure out how to get the middleware to work as http.Handler and
 // http.HandlerFunc so that the JSON response type can be agnostic from the
 // middleware
@@ -29,3 +31,6 @@ func (mwc middlewareChain) Bytes(h Handler) Handler {
 func (mwc middlewareChain) JSON(h Handler) JSON {
 	return JSON(mwc.Bytes(h))
 }
+
+// TODO(sam): the need for this is gross. this middleware layer needs luv
+type MiddlewareWrapper func(http.Handler) http.Handler

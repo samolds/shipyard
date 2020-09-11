@@ -1,8 +1,10 @@
-// TODO(sam): pull this in from docker environent
-db_url = "postgres://democart:democartpass@db/democart?sslmode=disable"
+//db_url = "postgres://democart:democartpass@db/democart?sslmode=disable"
 //db_url = "sqlite3:democart.sqlite3.db?sslmode=disable"
 
-server_url = "http://localhost:8080"
+api_slug = "democart"
+api_addr = ":8080"
+exposed_url = "http://localhost:8080"
+
 client_hosts = ["http://localhost:3000"]
 
 graceful_shutdown_timeout_sec = 5
