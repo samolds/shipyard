@@ -1,5 +1,30 @@
 # Democart
 
+Under construction. Possibly renaming to Leaven?
+
+This is my Sourdough Starter for containerized services - primarily K8s
+orchestrated Dockerized Go API Servers with Postgres. As my understanding of
+these services grow and I learn new things, I plan to add back to this repo
+with better practices and more idiomatic methods. I also plan to use bits from
+this repo as I build other projects.
+
+
+### About
+
+This is an exercise in orchestrating various production grade services. It
+consists of 3 basic components - an API server, an IDP, and a frontend, in
+addition to a database and a metric collection service. The three basic
+components can easily be stood up locally. Support for K8s and Docker Compose
+allows for the entire cluster to spin up easily.
+
+There are 3 ways to standup this project:
+1. Running the API binary locally and serving the frontend with dev react
+2. Using docker-compose to build and run each Docker container
+3. Using K8s to spin up a local Minikube cluster
+
+
+### Old About
+
 This is an exercise in building a modular and containerized Shopping Cart
 service. It consists of 3 main components:
 
@@ -55,49 +80,49 @@ make devup
 
 ### TODOs
 
+- ~~Use main.go style from demoapi in democart~~
+- ~~Better configuration handling between psql secrets and server config file
+  using config from demoapi~~
+- ~~Finish off basic K8s stuff with working example. commit branch. merge. Start
+  go backend cleanup~~
+- Add demoapi grafana/prometheus server
+- ~~Use Dockerfile template from demoapi in democart~~
+- Break out idp to separate server entirely.
+- Essentially, clean up democart to use some of the more elogant demoapi stuff,
+  but with all the functionality of democart
+- Rename Democart to API Server Stencil / Server, etc
+ - Something like:
+   - Levain
+   - API Starter
+   - Template
+   - K8s Server Template
+   - Prod Server
+   - Server Build
+   - Server Foundation
+   - API Foundation
+   - Prod API Base
+   - Sam Base
+   - API Base
+   - Base Layer
+   - API Thermal Layer
+- K8s configuration stuff:
+ - Add namespacing metadata
+ - Add rollingupdate strategy
+ - Add better labels/selectors - app, tier, env, release, etc
+- Clean up fake idp stuff. See if swapping out for Auth0 works.
+- ~~Use demoapi's `entrypoint.sh` instead of `wait_for_psql.sh`~~
+- ~~Clean up docker-compose stuff so that works in addition to k8s stuff~~
+- Stop using DBX
+- Figure out "failed to sync configmap cache: timed out waiting for the
+  condition" occasional error
+- Better pod DNS:
+    https://kubernetes.io/docs/concepts/services-networking/dns-pod-service
 - More unit tests
 - Better documentation
 - More graceful error handling
 - Stylize the frontend better
 - Production-ify with nginx, letsencrypt, K8s, and managed RDS db
-
-#### Now:
-1. Use main.go style from demoapi in democart
-2. Better configuration handling between psql secrets and server config file
-   using config from demoapi
-3. Finish off basic K8s stuff with working example. commit branch. merge. Start
-   go backend cleanup
-4. Add demoapi grafana/prometheus server
-5. Use Dockerfile template from demoapi in democart
-6. Break out idp to separate server entirely.
-7. Essentially, clean up democart to use some of the more elogant demoapi stuff,
-   but with all the functionality of democart
-8. Rename Democart to API Server Stencil / Server, etc
-  - Something like:
-    - API Starter
-    - Template
-    - K8s Server Template
-    - Prod Server
-    - Server Build
-    - Server Foundation
-    - API Foundation
-    - Prod API Base
-    - Sam Base
-    - API Base
-    - Base Layer
-    - API Thermal Layer
-9. K8s configuration stuff:
-  - Add namespacing metadata
-  - Add rollingupdate strategy
-  - Add better labels/selectors - app, tier, env, release, etc
-10. Clean up fake idp stuff. See if swapping out for Auth0 works.
-11. Use demoapi's `entrypoint.sh` instead of `wait_for_psql.sh`
-12. Clean up docker-compose stuff so that works in addition to k8s stuff
-13. Stop using DBX
-14. Figure out "failed to sync configmap cache: timed out waiting for the
-    condition" occasional error
-15. Better pod DNS:
-    https://kubernetes.io/docs/concepts/services-networking/dns-pod-service
+- Change helloworld.info k8s host to something better
 
 
 ### Notes

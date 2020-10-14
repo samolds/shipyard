@@ -10,5 +10,5 @@ injected and served from the same host as the marketplace API.
 ### Running Locally
 
 ```sh
-make run
+make runsqlite3
 ```

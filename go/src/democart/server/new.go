@@ -6,6 +6,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
+	"github.com/sirupsen/logrus"
 
 	"democart/config"
 	"democart/database"
@@ -19,8 +20,9 @@ var (
 
 type Server struct {
 	DB     *database.DB
-	router http.Handler
 	Config *config.Configs
+	log    *logrus.Entry
+	router http.Handler
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -28,7 +30,11 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func New(db *database.DB, configs *config.Configs) *Server {
-	s := &Server{DB: db, Config: configs}
+	s := &Server{
+		DB:     db,
+		Config: configs,
+		log:    logrus.WithField("version", configs.Version),
+	}
 	s.router = router(s)
 	return s
 }

@@ -1,7 +1,7 @@
-all: web
+VERSION ?= $(shell git rev-parse --verify HEAD)
 
-#VERSION = $(shell git rev-parse --verify HEAD)
-VERSION = "alpha"
+install:
+	npm ci
 
 web:
 	npm run build
@@ -13,4 +13,10 @@ clean:
 	rm -rf build
 
 docker-build:
-	docker build . -t democart_web:$(VERSION)
+	docker build . -t samolds/democart-web:$(VERSION)
+
+fresh:
+	make clean
+	rm -rf node_modules
+	make install
+	make web

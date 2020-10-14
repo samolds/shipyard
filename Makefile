@@ -1,17 +1,22 @@
-new:
-	make clean-docker
-	make build
-	make up
-
-clean:
-	cd go/src/democart && make clean
-	cd web/democart && make clean
+VERSION ?= $(shell git rev-parse --verify HEAD)
 
 build:
-	docker-compose -f docker-compose.yml build
+	VERSION=$(VERSION) docker-compose build
 
 up:
-	docker-compose up
+	VERSION=$(VERSION) docker-compose up
+
+down:
+	docker-compose down
+
+clean-docker: stop down
+	-docker container rm -f democart_api democart_db democart_web democart_grafana democart_prometheus democart_nginx_proxy democart_nginx_proxy_letsencrypt
+	-docker image rm -f samolds/democart-api samolds/democart-web
+	-docker container prune -f
+	-docker image prune -f
+	-docker volume prune -f
+	-docker network prune -f
+	-rm -rf monitor/grafana monitor/grafana_data
 
 start:
 	docker-compose start
@@ -19,22 +24,22 @@ start:
 stop:
 	docker-compose stop
 
-up-bg:
-	docker-compose up -d
-
 shell-server: start
-	docker exec -ti democart_server /bin/sh
+	docker exec -ti democart_api /bin/sh
 
 shell-db: start
 	docker exec -ti democart_db /bin/sh
 
-clean-docker: stop
-	rm -rf go/src/democart/postgres/data
-	-docker container rm -f democart_server democart_web democart_db
-	-docker image rm -f democart_server democart_web democart_db
-	-docker container prune -f
-	-docker image prune -f
+clean:
+	cd go/src/democart && make clean
+	cd web/democart && make clean
 
 devup:
 	cd go/src/democart && (make clean runsqlite3 &)
 	cd web/democart && make clean run
+
+fresh:
+	make clean
+	make clean-docker
+	make build
+	make up

@@ -31,6 +31,7 @@ var (
 )
 
 type Configs struct {
+	Version    string
 	DBURL      *url.URL
 	APISlug    string // shortname for the api server
 	APIAddress string // the port the api server is listening on localhost
@@ -50,6 +51,8 @@ type Configs struct {
 	ClientHosts             []*url.URL
 	ExposedURL              *url.URL // the scheme and host where this api is publicily accessible
 }
+
+func (c *Configs) SetVersion(v string) { c.Version = v }
 
 // Parse will set the configuration values pulled from the provided config
 // file, any config flags, and any environment variables. env vars have highest
@@ -268,6 +271,7 @@ func (raw *rawConfigs) validate() (*Configs, error) {
 	}
 
 	return &Configs{
+		Version:    "<unset>",
 		DBURL:      dbURL,
 		APISlug:    raw.APISlug,
 		APIAddress: raw.APIAddress,

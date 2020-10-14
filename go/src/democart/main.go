@@ -38,7 +38,7 @@ func run() error {
 
 	// set loglevel defined in config
 	logrus.SetLevel(conf.LogLevel)
-	// TODO(sam): include version with logger
+	conf.SetVersion(version)
 
 	// create a context that we can cancel
 	ctx, cancel := context.WithCancel(context.Background())

@@ -1,11 +1,9 @@
 go/pkg
 go/bin
-go/src/democart/postgres/data
 go/src/democart/democart
 web/client/build
 node_modules
 *.sqlite3.db*
-#pgpass # normally, don't include this
 
 k8s/*/*.secret.yml
 k8s/*/secret.yml

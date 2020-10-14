@@ -1,3 +1,4 @@
+### builder image
 FROM node:13.12.0-alpine AS builder
 
 WORKDIR /app
@@ -10,6 +11,9 @@ COPY . .
 RUN npm run build
 
 
+
+
+### runner image
 FROM nginx:stable-alpine
 COPY --from=builder /app/build /usr/share/nginx/html
 COPY --from=builder /app/sed_env_vars.sh /usr/local/bin/sed_env_vars.sh
