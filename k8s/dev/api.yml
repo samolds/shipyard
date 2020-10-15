@@ -17,6 +17,7 @@ data:
     api_slug = "democart"
     api_addr = ":8080"
     idp_addr = ":8081"
+    metric_addr = ":8082"
     graceful_shutdown_timeout_sec = 5
     write_timeout_sec = 15
     read_timeout_sec = 15
@@ -63,8 +64,8 @@ spec:
           name: api
         - containerPort: 8081
           name: idp
-        #- containerPort: 8082
-        #  name: metrics
+        - containerPort: 8082
+          name: metrics
         envFrom:
         - configMapRef:
             name: democart-backend-configmap
@@ -141,10 +142,10 @@ spec:
     port: 8001
     targetPort: 8081
     protocol: TCP
-  #- name: metrics
-  #  port: 8002
-  #  targetPort: 8082
-  #  protocol: TCP
+  - name: metrics
+    port: 8002
+    targetPort: 8082
+    protocol: TCP
 
 
 ## unavailable with minikube

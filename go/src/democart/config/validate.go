@@ -41,12 +41,12 @@ var (
 )
 
 type Configs struct {
-	Version    string
-	DBURL      *url.URL
-	APISlug    string
-	APIAddress string
-	IDPAddress string
-	//MetricAddress           string
+	Version                 string
+	DBURL                   *url.URL
+	APISlug                 string
+	APIAddress              string
+	IDPAddress              string
+	MetricAddress           string
 	GracefulShutdownTimeout time.Duration
 	WriteTimeout            time.Duration
 	ReadTimeout             time.Duration
@@ -95,11 +95,11 @@ func Parse() (*Configs, error) {
 }
 
 type rawConfigs struct {
-	DBURL      string `hcl:"db_url"`
-	APISlug    string `hcl:"api_slug"`
-	APIAddress string `hcl:"api_addr"`
-	IDPAddress string `hcl:"idp_addr"`
-	//MetricAddress           string   `hcl:"metric_addr"`
+	DBURL                   string   `hcl:"db_url"`
+	APISlug                 string   `hcl:"api_slug"`
+	APIAddress              string   `hcl:"api_addr"`
+	IDPAddress              string   `hcl:"idp_addr"`
+	MetricAddress           string   `hcl:"metric_addr"`
 	GracefulShutdownTimeout int      `hcl:"graceful_shutdown_timeout_sec"`
 	WriteTimeout            int      `hcl:"write_timeout_sec"`
 	ReadTimeout             int      `hcl:"read_timeout_sec"`
@@ -297,9 +297,9 @@ func (raw *rawConfigs) validate() (*Configs, error) {
 	if raw.APIAddress == "" {
 		return nil, configErr.New("api_addr unconfigured")
 	}
-	//if raw.MetricAddress == "" {
-	//	return nil, configErr.New("metric_addr unconfigured")
-	//}
+	if raw.MetricAddress == "" {
+		return nil, configErr.New("metric_addr unconfigured")
+	}
 	if raw.GracefulShutdownTimeout == 0 {
 		return nil, configErr.New("graceful_shutdown_timeout_sec unconfigured")
 	}
@@ -369,12 +369,12 @@ func (raw *rawConfigs) validate() (*Configs, error) {
 	}
 
 	return &Configs{
-		Version:    "<unset>",
-		DBURL:      dbURL,
-		APISlug:    raw.APISlug,
-		APIAddress: raw.APIAddress,
-		IDPAddress: raw.IDPAddress,
-		//MetricAddress:           raw.MetricAddress,
+		Version:                 "<unset>",
+		DBURL:                   dbURL,
+		APISlug:                 raw.APISlug,
+		APIAddress:              raw.APIAddress,
+		IDPAddress:              raw.IDPAddress,
+		MetricAddress:           raw.MetricAddress,
 		GracefulShutdownTimeout: grace,
 		WriteTimeout:            write,
 		ReadTimeout:             read,

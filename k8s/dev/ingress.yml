@@ -39,13 +39,13 @@ spec:
             name: democart-backend-service
             port:
               number: 8001
-  #- host: metrics.helloworld.info
-  #  http:
-  #    paths:
-  #    - path: /?(.*)
-  #      pathType: Prefix
-  #      backend:
-  #        service:
-  #          name: democart-backend-service
-  #          port:
-  #            number: 8002
+  - host: metrics.helloworld.info
+    http:
+      paths:
+      - path: /?(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: democart-backend-service
+            port:
+              number: 8002

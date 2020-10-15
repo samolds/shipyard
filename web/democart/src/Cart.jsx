@@ -22,6 +22,7 @@ export default class Cart extends Component {
   orderItemsInCart = () => {
     if (this.props.addresses.length < 1) {
       // TODO(sam): return a better error here
+      console.log("error: no address exists");
       return "error";
     }
 

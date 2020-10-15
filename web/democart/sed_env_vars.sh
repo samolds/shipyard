@@ -10,11 +10,11 @@ SED_DIR="$1"
 
 if [[ ! -z "${SED_DIR}" ]]; then
 
-  DEV_BACKEND_ADDRESS="http://localhost:8080"
-  if [[ ! -z "${BACKEND_ADDRESS}" ]]; then
+  DEV_PUBLIC_API_URL="http://localhost:8080"
+  if [[ ! -z "${PUBLIC_API_URL}" ]]; then
     find ${SED_DIR} -type f -exec \
-      sed -i -e 's@'"${DEV_BACKEND_ADDRESS}"'@'"${BACKEND_ADDRESS}"'@g' {} \;
-    echo "Backend address updated from ${DEV_BACKEND_ADDRESS} to ${BACKEND_ADDRESS}"
+      sed -i -e 's@'"${DEV_PUBLIC_API_URL}"'@'"${PUBLIC_API_URL}"'@g' {} \;
+    echo "Backend address updated from ${DEV_PUBLIC_API_URL} to ${PUBLIC_API_URL}"
   fi
 
 fi

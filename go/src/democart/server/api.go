@@ -4,11 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi"
 
 	"democart/database"
 	he "democart/httperror"
+	monitor "democart/prometheus"
 	"democart/util"
 )
 
@@ -139,6 +141,8 @@ func (s *Server) AddItem(ctx context.Context, w http.ResponseWriter,
 	if err != nil {
 		return nil, err
 	}
+
+	monitor.ItemGauge.Inc()
 
 	resp := &RootJSON{
 		Item: apiItem(dbItem),
@@ -326,6 +330,7 @@ func (s *Server) UpdateCart(ctx context.Context, w http.ResponseWriter,
 	// TODO(sam): break out this horribly massive db function to a database
 	// layer/package
 	// TODO(sam): this needs some unit testing
+	queryStartTime := time.Now()
 	err = s.DB.WithTx(ctx, func(ctx context.Context, tx *database.Tx) error {
 		// get the item in the users cart
 		cartItem, err := tx.Get_CartItem_By_Item_Id_And_CartItem_UserPk(ctx,
@@ -417,6 +422,9 @@ func (s *Server) UpdateCart(ctx context.Context, w http.ResponseWriter,
 		return nil, err
 	}
 
+	monitor.UpdateCartDatabaseQueryLatencyHistogram.Observe(
+		time.Now().Sub(queryStartTime).Seconds())
+
 	return s.ListCart(ctx, w, r)
 }
 
@@ -503,6 +511,11 @@ func (s *Server) AddOrder(ctx context.Context, w http.ResponseWriter,
 
 		return nil
 	})
+	if err != nil {
+		return nil, err
+	}
+
+	monitor.PurchasesGauge.Add(float64(len(order.Orders)))
 
 	return nil, nil
 }

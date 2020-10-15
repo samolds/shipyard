@@ -3,8 +3,9 @@
 
 api_slug = "democart"
 
-api_addr = ":8080"
-idp_addr = ":8081"
+api_addr    = ":8080"
+idp_addr    = ":8081"
+metric_addr = ":8082"
 
 //public_api_url = "http://localhost:8080"
 //public_idp_url = "http://localhost:8081"

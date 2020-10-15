@@ -91,8 +91,8 @@ func router(s *Server) http.Handler {
 
 // NewHTTPServer constructs a new http.Server to listen for connections and
 // serve responses as defined by the Server's ServeHTTP defined above.
-func NewHTTPServer(configs *config.Configs) (*Server, *http.Server, error) {
-	//metricMiddleware h.MiddlewareWrapper) (*Server, *http.Server, error) {
+func NewHTTPServer(configs *config.Configs,
+	metricMiddleware h.MiddlewareWrapper) (*Server, *http.Server, error) {
 
 	// TODO(sam): pass through database configs
 	db, err := database.Connect(configs.DBURL, nil)
@@ -103,9 +103,9 @@ func NewHTTPServer(configs *config.Configs) (*Server, *http.Server, error) {
 	apiClient := New(db, configs)
 
 	var apiHandler http.Handler = apiClient
-	//if metricMiddleware != nil {
-	//	apiHandler = metricMiddleware(apiHandler)
-	//}
+	if metricMiddleware != nil {
+		apiHandler = metricMiddleware(apiHandler)
+	}
 
 	return apiClient, &http.Server{
 		Addr:         configs.APIAddress,

@@ -14,6 +14,7 @@ import (
 
 	"democart/database"
 	he "democart/httperror"
+	monitor "democart/prometheus"
 	"democart/util"
 )
 
@@ -102,6 +103,9 @@ func (s *Server) SignupComplete(ctx context.Context, w http.ResponseWriter,
 		if err != nil {
 			return nil, errs.Wrap(err)
 		}
+
+		monitor.UserGauge.Inc()
+
 		return u, nil
 	}
 

@@ -13,6 +13,7 @@ import (
 
 	"democart/config"
 	"democart/idp"
+	monitor "democart/prometheus"
 	api "democart/server"
 )
 
@@ -48,12 +49,11 @@ func run() error {
 	// stay alive for all goroutines to finish
 	wg := sync.WaitGroup{}
 
-	//// initialize the metric server
-	//metricClient, metricServer, metricMiddleware, err := prometheus.NewHTTPServer(conf)
-	//if err != nil {
-	//	return err
-	//}
-	//defer metricClient.Close()
+	// initialize the metric server
+	metricServer, metricMiddleware, err := monitor.NewHTTPServer(conf)
+	if err != nil {
+		return err
+	}
 
 	// initialize the idp server
 	idpClient, idpServer, err := idp.NewHTTPServer(conf)
@@ -63,16 +63,15 @@ func run() error {
 	defer idpClient.Close()
 
 	// initialize the api server
-	//apiClient, apiServer, err := api.NewHTTPServer(conf, metricMiddleware)
-	apiClient, apiServer, err := api.NewHTTPServer(conf)
+	apiClient, apiServer, err := api.NewHTTPServer(conf, metricMiddleware)
 	if err != nil {
 		return err
 	}
 	defer apiClient.Close()
 
-	//// service 1 - start the metric server
-	//wg.Add(1)
-	//go gracefullyServe(ctx, &wg, metricServer, conf.GracefulShutdownTimeout)
+	// service 1 - start the metric server
+	wg.Add(1)
+	go gracefullyServe(ctx, &wg, metricServer, conf.GracefulShutdownTimeout)
 
 	// service 2 - start the idp server
 	wg.Add(1)

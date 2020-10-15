@@ -85,7 +85,7 @@ make devup
   using config from demoapi~~
 - ~~Finish off basic K8s stuff with working example. commit branch. merge. Start
   go backend cleanup~~
-- Add demoapi grafana/prometheus server
+- ~~Add demoapi grafana/prometheus server~~
 - ~~Use Dockerfile template from demoapi in democart~~
 - ~~Break out idp to separate server entirely.~~
 - ~~Essentially, clean up democart to use some of the more elogant demoapi stuff,
@@ -108,6 +108,7 @@ make devup
    - ~~Add namespacing metadata~~
    - ~~Add rollingupdate strategy~~
    - Add better labels/selectors - app, tier, env, release, etc
+- Get Prometheus/Grafana metrics serving in K8s minikube
 - Clean up fake idp stuff. See if swapping out for Auth0 works.
 - ~~Use demoapi's `entrypoint.sh` instead of `wait_for_psql.sh`~~
 - ~~Clean up docker-compose stuff so that works in addition to k8s stuff~~
