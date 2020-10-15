@@ -16,6 +16,7 @@ data:
   config.hcl: |
     api_slug = "democart"
     api_addr = ":8080"
+    idp_addr = ":8081"
     graceful_shutdown_timeout_sec = 5
     write_timeout_sec = 15
     read_timeout_sec = 15
@@ -25,8 +26,9 @@ data:
     idp_client_secret = "idp_client_secret"
     loglevel = "debug"
     developer_mode = true
-    exposed_url = "http://api.helloworld.info"
     client_hosts = ["http://helloworld.info"]
+    public_api_url = "http://api.helloworld.info"
+    public_idp_url = "http://idp.helloworld.info"
 
 ---
 
@@ -54,13 +56,13 @@ spec:
       containers:
       - name: democart-backend-docker
         image: "samolds/democart-api:latest"
-        command: ["/usr/local/bin/democart"]
+        command: ["/usr/local/bin/entrypoint.sh", "/usr/local/bin/democart"]
         args: ["--configs", "/etc/config/democart_backend/config.hcl,/etc/config/democart_backend/secrets.hcl"]
         ports:
         - containerPort: 8080
           name: api
-        #- containerPort: 8081
-        #  name: idp
+        - containerPort: 8081
+          name: idp
         #- containerPort: 8082
         #  name: metrics
         envFrom:
@@ -131,17 +133,17 @@ spec:
     app: democart-backend
   type: LoadBalancer
   ports:
-  - name: http
-    port: 8000 # the exposed port. what web is pointing to in package.json
+  - name: api
+    port: 8000 # the exposed port picked up by the ingress
     targetPort: 8080 # containerPort. where the container is listening
     protocol: TCP
-  #- name: http
-  #  port: 8001 # the exposed port. what web is pointing to in package.json
-  #  targetPort: 8081 # containerPort. where the container is listening
-  #  protocol: TCP
-  #- name: http
-  #  port: 8002 # the exposed port. what web is pointing to in package.json
-  #  targetPort: 8082 # containerPort. where the container is listening
+  - name: idp
+    port: 8001
+    targetPort: 8081
+    protocol: TCP
+  #- name: metrics
+  #  port: 8002
+  #  targetPort: 8082
   #  protocol: TCP
 
 

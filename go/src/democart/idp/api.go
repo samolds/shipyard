@@ -46,7 +46,7 @@ func (i *IDP) Login(ctx context.Context, w http.ResponseWriter,
 	r *http.Request) (interface{}, error) {
 
 	q := r.URL.Query()
-	form := emailPasswordForm("Login", "/fakeidp/idplogincomplete", q)
+	form := emailPasswordForm("Login", "/idplogincomplete", q)
 	return form, nil
 }
 
@@ -90,7 +90,7 @@ func (i *IDP) Signup(ctx context.Context, w http.ResponseWriter,
 	r *http.Request) (interface{}, error) {
 
 	q := r.URL.Query()
-	form := emailPasswordForm("Signup", "/fakeidp/idpsignupcomplete", q)
+	form := emailPasswordForm("Signup", "/idpsignupcomplete", q)
 	return form, nil
 }
 

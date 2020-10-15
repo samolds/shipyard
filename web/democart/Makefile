@@ -1,4 +1,4 @@
-VERSION ?= $(shell git rev-parse --verify HEAD)
+VERSION ?= $(shell git describe --always --abbrev=16 --dirty)
 
 install:
 	npm ci

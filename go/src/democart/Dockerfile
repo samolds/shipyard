@@ -55,3 +55,4 @@ CMD ["/usr/local/bin/entrypoint.sh", \
   "--configs=/etc/democart/dockerfile_config.hcl"]
 
 EXPOSE 8080
+EXPOSE 8081

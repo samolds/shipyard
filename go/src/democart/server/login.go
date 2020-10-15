@@ -17,16 +17,19 @@ import (
 	"democart/util"
 )
 
-func (s *Server) ExposedAPIURL() url.URL {
-	exposed_url_copy, _ := url.Parse(s.Config.ExposedURL.String())
-	return *exposed_url_copy
+func (s *Server) PublicAPIURL() url.URL {
+	urlCopy, _ := url.Parse(s.Config.PublicAPIURL.String())
+	return *urlCopy
 }
 
-// TODO(sam): the idp url should be provided as a config flag so that it can
-// live totally separately
+func (s *Server) PublicIDPURL() url.URL {
+	urlCopy, _ := url.Parse(s.Config.PublicIDPURL.String())
+	return *urlCopy
+}
+
 func (s *Server) idpURL(next string) string {
-	root := s.ExposedAPIURL()
-	root.Path = path.Join(root.Path, fakeIDPPath, next)
+	root := s.PublicIDPURL()
+	root.Path = path.Join(root.Path, next)
 	return root.String()
 }
 
@@ -112,7 +115,7 @@ func (s *Server) SignupComplete(ctx context.Context, w http.ResponseWriter,
 func (s *Server) beginAuth(ctx context.Context, w http.ResponseWriter,
 	r *http.Request, idpURI, finalRedirectURI string) (interface{}, error) {
 
-	codeExchanger := s.ExposedAPIURL()
+	codeExchanger := s.PublicAPIURL()
 	codeExchanger.Path = path.Join(finalRedirectURI)
 	codeExchange := codeExchanger.String()
 	referrer := r.Header.Get("referer")

@@ -11,11 +11,6 @@ import (
 	"democart/config"
 	"democart/database"
 	h "democart/handler"
-	"democart/idp"
-)
-
-var (
-	fakeIDPPath = "/fakeidp"
 )
 
 type Server struct {
@@ -37,6 +32,10 @@ func New(db *database.DB, configs *config.Configs) *Server {
 	}
 	s.router = router(s)
 	return s
+}
+
+func (s *Server) Close() error {
+	return s.DB.Close()
 }
 
 func router(s *Server) http.Handler {
@@ -87,38 +86,28 @@ func router(s *Server) http.Handler {
 	apiRoutes.Method("POST", "/order", apiMW.JSON(s.AddOrder))
 	r.Mount("/api", apiRoutes)
 
-	// this is a fake identity provider that should be easily swappable for
-	// something real, like Auth0. All that's needed is to redirect to a proper
-	// idp instead of this one, and make sure to include the necessary client
-	// ids/secrets/etc.
-	//
-	// TODO(sam): break this out to a completely different server listening on a
-	// different port and provide exposed public url config too
-	idpRoutes := idp.New(s.Config.IDPPasswordSalt, s.DB)
-	r.Mount(fakeIDPPath, idpRoutes)
-
 	return r
 }
 
 // NewHTTPServer constructs a new http.Server to listen for connections and
 // serve responses as defined by the Server's ServeHTTP defined above.
-func NewHTTPServer(configs *config.Configs) (*http.Server, error) {
-	//metricMiddleware h.MiddlewareWrapper) (*http.Server, error) {
+func NewHTTPServer(configs *config.Configs) (*Server, *http.Server, error) {
+	//metricMiddleware h.MiddlewareWrapper) (*Server, *http.Server, error) {
 
 	// TODO(sam): pass through database configs
 	db, err := database.Connect(configs.DBURL, nil)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	var apiHandler http.Handler
-	apiHandler = New(db, configs)
+	apiClient := New(db, configs)
 
+	var apiHandler http.Handler = apiClient
 	//if metricMiddleware != nil {
 	//	apiHandler = metricMiddleware(apiHandler)
 	//}
 
-	return &http.Server{
+	return apiClient, &http.Server{
 		Addr:         configs.APIAddress,
 		WriteTimeout: configs.WriteTimeout,
 		ReadTimeout:  configs.ReadTimeout,

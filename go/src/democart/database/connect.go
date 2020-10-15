@@ -26,18 +26,16 @@ type Config struct {
 // database interface to make supporting multiple database drivers easier and
 // cleaner. all of the switches are gross.
 // TODO(sam): add support for migrations! Critical importance.
-func Connect(dbURL *url.URL, c *Config) (*DB, error) {
+func Connect(databaseURL *url.URL, c *Config) (*DB, error) {
 	// WrapErr is a dbx specific error wrapping hook
 	WrapErr = StacktraceWrapAnyError
 
-	// copy the dbURL
-	loggableURL, err := url.Parse(dbURL.String())
-	if err != nil {
-		return nil, err
-	}
+	// copy the databaseURL
+	loggableURL := *databaseURL
 	loggableURL.User = nil // don't log username/password
 	logrus.Infof("connecting to db: %s", loggableURL.String())
 
+	dbURL := *databaseURL
 	driver := strings.ToLower(dbURL.Scheme)
 	if driver == "sqlite3" {
 		dbURL.Scheme = "file"

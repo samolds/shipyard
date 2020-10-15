@@ -3,13 +3,8 @@
 1. Build and publish new Docker images
 
 ```sh
-docker build -t samolds/democart-api go/src/democart
-docker build -t samolds/democart-web web/democart
-
-docker login -u samolds
-
-docker push samolds/democart-api
-docker push samolds/democart-web
+make build
+make push-docker-images
 ```
 
 2. Start Minikube with an ingress and hpa enabled
@@ -26,7 +21,9 @@ minikube addons enable ingress
 MKIP=$(minikube ip)
 echo "$MKIP helloworld.info" | sudo tee -a /etc/hosts
 echo "$MKIP api.helloworld.info" | sudo tee -a /etc/hosts
+echo "$MKIP idp.helloworld.info" | sudo tee -a /etc/hosts
 echo "$MKIP api.helloworld.info" | minikube ssh -- sudo tee -a /etc/hosts
+echo "$MKIP idp.helloworld.info" | minikube ssh -- sudo tee -a /etc/hosts
 ```
 
 4. Test apply the K8s configurations

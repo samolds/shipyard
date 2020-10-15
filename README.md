@@ -87,11 +87,10 @@ make devup
   go backend cleanup~~
 - Add demoapi grafana/prometheus server
 - ~~Use Dockerfile template from demoapi in democart~~
-- Break out idp to separate server entirely.
-- Essentially, clean up democart to use some of the more elogant demoapi stuff,
-  but with all the functionality of democart
-- Rename Democart to API Server Stencil / Server, etc
- - Something like:
+- ~~Break out idp to separate server entirely.~~
+- ~~Essentially, clean up democart to use some of the more elogant demoapi stuff,
+  but with all the functionality of democart~~
+- Rename Democart to API Server Stencil / Server, etc. Something like:
    - Levain
    - API Starter
    - Template
@@ -106,9 +105,9 @@ make devup
    - Base Layer
    - API Thermal Layer
 - K8s configuration stuff:
- - Add namespacing metadata
- - Add rollingupdate strategy
- - Add better labels/selectors - app, tier, env, release, etc
+   - ~~Add namespacing metadata~~
+   - ~~Add rollingupdate strategy~~
+   - Add better labels/selectors - app, tier, env, release, etc
 - Clean up fake idp stuff. See if swapping out for Auth0 works.
 - ~~Use demoapi's `entrypoint.sh` instead of `wait_for_psql.sh`~~
 - ~~Clean up docker-compose stuff so that works in addition to k8s stuff~~
@@ -123,6 +122,7 @@ make devup
 - Stylize the frontend better
 - Production-ify with nginx, letsencrypt, K8s, and managed RDS db
 - Change helloworld.info k8s host to something better
+- ~~Do better git ref version in makefiles~~
 
 
 ### Notes

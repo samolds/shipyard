@@ -5,7 +5,9 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 
+	"democart/config"
 	"democart/database"
 	h "democart/handler"
 )
@@ -32,8 +34,14 @@ func New(salt string, db *database.DB) *IDP {
 	return i
 }
 
+func (i *IDP) Close() error {
+	return i.DB.Close()
+}
+
 func router(i *IDP) http.Handler {
 	r := chi.NewRouter()
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
 
 	mw := h.MiddlewareChain()
 
@@ -45,4 +53,26 @@ func router(i *IDP) http.Handler {
 
 	r.Method("POST", "/idptoken", mw.JSON(i.TokenExchange))
 	return r
+}
+
+// NewHTTPServer constructs a new http.Server to listen for connections and
+// serve responses as defined by the IDP's ServeHTTP defined above.
+func NewHTTPServer(configs *config.Configs) (*IDP, *http.Server, error) {
+
+	// just connect to the existing db instead of trying to separate it out like
+	// we would want to do irl
+	// TODO(sam): pass through database configs
+	db, err := database.Connect(configs.DBURL, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	idpClient := New(configs.IDPPasswordSalt, db)
+	return idpClient, &http.Server{
+		Addr:         configs.IDPAddress,
+		WriteTimeout: configs.WriteTimeout,
+		ReadTimeout:  configs.ReadTimeout,
+		IdleTimeout:  configs.IdleTimeout,
+		Handler:      idpClient,
+	}, nil
 }

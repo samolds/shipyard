@@ -9,9 +9,10 @@ services:
       context: ./go/src/democart
       dockerfile: Dockerfile
       args:
-        VERSION: "${VERSION:-alpha}"
+        VERSION: "${VERSION:-dev}"
     ports:
-      - "8080:8080"
+      - "8000:8080" # host:container
+      - "8081:8081" # the same because api comms with idp within the container
     depends_on:
       - db
     environment: # TODO(sam): better secret management. use env_file?
@@ -22,6 +23,9 @@ services:
       DATABASE_USER: democart
       DATABASE_PASSWORD: democartpass
       DATABASE_NAME: democart
+      PUBLIC_API_URL: "http://localhost:8000"
+      PUBLIC_IDP_URL: "http://localhost:8081"
+      CLIENT_HOSTS:   "http://localhost:3000"
     restart: unless-stopped
 
   db: # TODO(sam): remove for prod and replace with rds
@@ -32,8 +36,8 @@ services:
       POSTGRES_DB: democart
       POSTGRES_USER: democart
       POSTGRES_PASSWORD: democartpass
-    ports:
-      - "5432:5432"
+    expose: # expose only to other services, and not host machine
+      - "5432"
     volumes: # remove volume to not persist data between containerizations
       - postgres_data:/var/lib/postgresql/data/
 
@@ -44,7 +48,7 @@ services:
       context: ./web/democart
       dockerfile: Dockerfile
     environment:
-      BACKEND_ADDRESS: "http://localhost:8080"
+      BACKEND_ADDRESS: "http://localhost:8000"
     ports:
       - "3000:80"
 

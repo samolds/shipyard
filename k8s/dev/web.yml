@@ -57,8 +57,8 @@ spec:
   type: LoadBalancer
   ports:
   - name: http
-    port: 3000 # the exposed port
-    targetPort: 80 # the port the container is listening on
+    port: 3000 # the exposed port picked up by the ingress
+    targetPort: 80 # the containerPort above
     protocol: TCP
 
 

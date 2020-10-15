@@ -12,6 +12,7 @@ import (
 	"github.com/zeebo/errs"
 
 	"democart/config"
+	"democart/idp"
 	api "democart/server"
 )
 
@@ -48,23 +49,36 @@ func run() error {
 	wg := sync.WaitGroup{}
 
 	//// initialize the metric server
-	//metricServer, metricMiddleware, err := prometheus.NewHTTPServer(conf)
+	//metricClient, metricServer, metricMiddleware, err := prometheus.NewHTTPServer(conf)
 	//if err != nil {
 	//	return err
 	//}
+	//defer metricClient.Close()
 
-	// initialize the api server
-	//apiServer, err := api.NewHTTPServer(conf, metricMiddleware)
-	apiServer, err := api.NewHTTPServer(conf)
+	// initialize the idp server
+	idpClient, idpServer, err := idp.NewHTTPServer(conf)
 	if err != nil {
 		return err
 	}
+	defer idpClient.Close()
+
+	// initialize the api server
+	//apiClient, apiServer, err := api.NewHTTPServer(conf, metricMiddleware)
+	apiClient, apiServer, err := api.NewHTTPServer(conf)
+	if err != nil {
+		return err
+	}
+	defer apiClient.Close()
 
 	//// service 1 - start the metric server
 	//wg.Add(1)
 	//go gracefullyServe(ctx, &wg, metricServer, conf.GracefulShutdownTimeout)
 
-	// service 2 - start the api server
+	// service 2 - start the idp server
+	wg.Add(1)
+	go gracefullyServe(ctx, &wg, idpServer, conf.GracefulShutdownTimeout)
+
+	// service 3 - start the api server
 	logrus.Infof("starting democart version %q", version)
 	wg.Add(1)
 	go gracefullyServe(ctx, &wg, apiServer, conf.GracefulShutdownTimeout)
