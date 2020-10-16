@@ -1,0 +1,15 @@
+#!/bin/bash
+
+MKIP=$(minikube ip)
+echo "$MKIP helloworld.info" | tee -a /etc/hosts
+echo "$MKIP api.helloworld.info" | tee -a /etc/hosts
+echo "$MKIP idp.helloworld.info" | tee -a /etc/hosts
+echo "$MKIP prom.helloworld.info" | tee -a /etc/hosts
+echo "$MKIP grafana.helloworld.info" | tee -a /etc/hosts
+
+# necessary for CORS between frontend and backend
+echo "$MKIP api.helloworld.info" | minikube ssh -- sudo tee -a /etc/hosts
+# necessary during token exchange between api and idp during login/signup
+echo "$MKIP idp.helloworld.info" | minikube ssh -- sudo tee -a /etc/hosts
+# necessary for grafana to pull from prometheus server
+echo "$MKIP prom.helloworld.info" | minikube ssh -- sudo tee -a /etc/hosts

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# TODO(sam): add a context
+#ARGS="--context=democart --namespace=dev"
+ARGS="--namespace=dev"
+
+# some of the k8s resources need to be created before others
+kubectl $ARGS apply -f "../namespace.yml"
+kubectl $ARGS apply -f "../db_persistentvolumes.yml"
+kubectl $ARGS apply -f "../grafana_persistentvolumes.yml"
+kubectl $ARGS apply -f "../secret.yml"
+kubectl $ARGS apply -f "../"

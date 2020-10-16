@@ -1,0 +1,7 @@
+#!/bin/bash
+
+kubectl delete namespaces dev 
+kubectl delete pv democart-db-persistentvolume 
+kubectl delete pv democart-grafana-persistentvolume 
+
+minikube ssh -- sudo rm -rf /data/democart-db-data /data/democart-grafana-data

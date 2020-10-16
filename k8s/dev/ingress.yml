@@ -39,13 +39,23 @@ spec:
             name: democart-backend-service
             port:
               number: 8001
-  - host: metrics.helloworld.info
+  - host: prom.helloworld.info
     http:
       paths:
       - path: /?(.*)
         pathType: Prefix
         backend:
           service:
-            name: democart-backend-service
+            name: democart-prometheus-service
             port:
-              number: 8002
+              number: 9000
+  - host: grafana.helloworld.info
+    http:
+      paths:
+      - path: /?(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: democart-grafana-service
+            port:
+              number: 5000

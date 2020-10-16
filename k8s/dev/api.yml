@@ -51,7 +51,7 @@ spec:
         #tier: backend
     spec:
       # to copy minikube hosts /etc/hosts to each pod (so that
-      # api.helloworld.info can be resolved from within the pods)
+      # idp.helloworld.info can be resolved from within the pods)
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
       containers:
@@ -66,16 +66,6 @@ spec:
           name: idp
         - containerPort: 8082
           name: metrics
-        envFrom:
-        - configMapRef:
-            name: democart-backend-configmap
-        - secretRef:
-            name: democart-backend-secret
-        env:
-        - name: MY_POD_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.name
         resources:
           requests:
             cpu: 100m
@@ -96,6 +86,16 @@ spec:
             port: 8080
           initialDelaySeconds: 10
           timeoutSeconds: 10
+        envFrom:
+        - configMapRef:
+            name: democart-backend-configmap
+        - secretRef:
+            name: democart-backend-secret
+        env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         volumeMounts:
         - name: democart-backend-config
           mountPath: /etc/config/democart_backend

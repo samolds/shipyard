@@ -1,0 +1,71 @@
+# configurations for backend prometheus pods
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: democart-prometheus-configmap
+  namespace: dev
+data:
+  prometheus.yml: |
+    scrape_configs:
+    # monitors the prometheus server itself
+    #- job_name: "prometheus"
+    #  static_configs:
+    #  - targets: ["localhost:9090"]
+
+    - job_name: "democart_backend_metrics"
+      metrics_path: "/metrics"
+      scrape_interval: 1s # originally 5s
+      static_configs:
+        - targets: ["democart-backend-service:8002"]
+
+---
+
+# template to define backend prometheus pods
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: democart-prometheus-deployment
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app: democart-prometheus
+  template:
+    metadata:
+      labels:
+        app: democart-prometheus
+    spec:
+      containers:
+      - name: democart-prometheus-docker
+        image: prom/prometheus
+        ports:
+        - containerPort: 9090
+        volumeMounts:
+        - name: democart-prometheus-config
+          mountPath: /etc/prometheus/
+          readOnly: true
+      volumes:
+      - name: democart-prometheus-config
+        projected:
+          sources:
+          - configMap:
+             name: democart-prometheus-configmap
+  replicas: 1
+
+---
+
+# abstraction to expose backend prometheus pods
+apiVersion: v1
+kind: Service
+metadata:
+  name: democart-prometheus-service
+  namespace: dev
+spec:
+  selector:
+    app: democart-prometheus
+  type: LoadBalancer
+  ports:
+  - name: http
+    port: 9000
+    targetPort: 9090
+    protocol: TCP

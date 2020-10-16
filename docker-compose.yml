@@ -72,7 +72,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./monitor/dockercompose_prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./monitor/prometheus.yml:/etc/prometheus/prometheus.yml
       - prom/prometheus
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"

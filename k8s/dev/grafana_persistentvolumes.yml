@@ -1,10 +1,11 @@
-# a storage solution for the database pods
+# a storage solution for the grafana pods
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: democart-db-persistentvolume
+  name: democart-grafana-persistentvolume
   # persistentvolumes don't use namespace
   labels:
+    using-name: democart-grafana
     using-namespace: dev
 spec:
   storageClassName: standard
@@ -13,7 +14,7 @@ spec:
   capacity:
     storage: 1Gi
   hostPath:
-    path: /data/democart-db-data
+    path: /data/democart-grafana-data
   # irl, this would be "Retain". otherwise, what's the point of the stateful
   # set?! this will essentially `rm -rf /volume/*` on the host machine
   persistentVolumeReclaimPolicy: Delete
@@ -25,11 +26,12 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: democart-db-persistentvolumeclaim
+  name: democart-grafana-persistentvolumeclaim
   namespace: dev
 spec:
   selector:
     matchLabels:
+      using-name: democart-grafana
       using-namespace: dev
   storageClassName: standard
   accessModes:

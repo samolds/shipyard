@@ -1,0 +1,41 @@
+# a storage solution for the database pods
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: democart-db-persistentvolume
+  # persistentvolumes don't use namespace
+  labels:
+    using-name: democart-db
+    using-namespace: dev
+spec:
+  storageClassName: standard
+  accessModes:
+  - ReadWriteOnce
+  capacity:
+    storage: 1Gi
+  hostPath:
+    path: /data/democart-db-data
+  # irl, this would be "Retain". otherwise, what's the point of the stateful
+  # set?! this will essentially `rm -rf /volume/*` on the host machine
+  persistentVolumeReclaimPolicy: Delete
+
+---
+
+# an abstraction above the persistent volume that deployments can mount
+# as volumes
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: democart-db-persistentvolumeclaim
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      using-name: democart-db
+      using-namespace: dev
+  storageClassName: standard
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

@@ -22,8 +22,12 @@ MKIP=$(minikube ip)
 echo "$MKIP helloworld.info" | sudo tee -a /etc/hosts
 echo "$MKIP api.helloworld.info" | sudo tee -a /etc/hosts
 echo "$MKIP idp.helloworld.info" | sudo tee -a /etc/hosts
+echo "$MKIP prom.helloworld.info" | sudo tee -a /etc/hosts
+echo "$MKIP grafana.helloworld.info" | sudo tee -a /etc/hosts
+
 echo "$MKIP api.helloworld.info" | minikube ssh -- sudo tee -a /etc/hosts
 echo "$MKIP idp.helloworld.info" | minikube ssh -- sudo tee -a /etc/hosts
+echo "$MKIP prom.helloworld.info" | minikube ssh -- sudo tee -a /etc/hosts
 ```
 
 4. Test apply the K8s configurations
@@ -35,7 +39,7 @@ kubectl apply -f k8s/dev --dry-run --validate=true
 5. If everything looks good, actually apply configs
 
 ```sh
-cd k8s && ./apply_dev && cd ..
+cd k8s/dev/scripts && ./apply_dev && cd ../../..
 ```
 
 6. Navigate to `http://helloworld.info` in a browser
@@ -44,13 +48,15 @@ cd k8s && ./apply_dev && cd ..
 
 ```sh
 # persitent volumes (pv) aren't namespace scoped. delete manually
-kubectl delete namespaces dev && kubectl delete pv democart-db-persistentvolume
+kubectl delete namespaces dev
+kubectl delete pv democart-db-persistentvolume
+kubectl delete pv democart-grafana-persistentvolume
 ```
 
-8. Delete statefully persistent db data
+8. Delete statefully persistent db data on host node
 
 ```sh
-minikube ssh -- sudo rm -rf /data/democart-db-data
+minikube ssh -- sudo rm -rf /data/democart-db-data /data/democart-grafana-data
 ```
 
 9. Cleanup Hosts
@@ -62,6 +68,15 @@ minikube ssh
 vi /etc/hosts
 # remove helloworld.info references
 ```
+
+
+### Grafana
+
+To hook up Grafana to the Prometheus Server, add a new prometheus
+datasource in the Grafana dashboard (at http://grafana.helloworld.info). The first time
+you sign in, the credentials are admin:admin.
+
+Add http://prom.helloworld.info as the URL, and leave access as "Server". Then scroll down and click "Save and Test".
 
 
 ### Other Useful Commands

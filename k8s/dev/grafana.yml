@@ -1,0 +1,58 @@
+# template to define grafana pods
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: democart-grafana-deployment
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app: democart-grafana
+  template:
+    metadata:
+      labels:
+        app: democart-grafana
+    spec:
+      # to copy minikube hosts /etc/hosts to each pod (so that
+      # prom.helloworld.info can be resolved from within the pods)
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+      - name: democart-grafana-docker
+        image: grafana/grafana
+        ports:
+        - containerPort: 3000
+        env:
+        - name: GF_SERVER_HTTP_PORT
+          value: "3000"
+        - name: GF_INSTALL_PLUGINS
+          # a csv of plugins
+          value: "grafana-kubernetes-app"
+        securityContext: # TODO(sam): review this! add to other deployments?
+          runAsUser: 0 # bad. don't do this
+        volumeMounts:
+        - name: democart-grafana-persistent-storage
+          mountPath: /var/lib/grafana
+      volumes:
+      - name: democart-grafana-persistent-storage
+        persistentVolumeClaim:
+          claimName: democart-grafana-persistentvolumeclaim
+  replicas: 1
+
+---
+
+# abstraction to expose grafana pods
+apiVersion: v1
+kind: Service
+metadata:
+  name: democart-grafana-service
+  namespace: dev
+spec:
+  selector:
+    app: democart-grafana
+  type: LoadBalancer
+  ports:
+  - name: http
+    port: 5000
+    targetPort: 3000
+    protocol: TCP

@@ -124,6 +124,8 @@ make devup
 - Production-ify with nginx, letsencrypt, K8s, and managed RDS db
 - Change helloworld.info k8s host to something better
 - ~~Do better git ref version in makefiles~~
+- Can DNS stuff be done better by using the FQDN everywhere?
+- Look into Helm charts
 
 
 ### Notes
