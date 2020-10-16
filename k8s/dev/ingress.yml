@@ -8,7 +8,7 @@ metadata:
     nginx.ingress.kubernetes.io/rewrite-target: /$1
 spec:
   rules:
-  - host: helloworld.info
+  - host: democart.tech
     http:
       paths:
       # https://github.com/kubernetes/ingress-nginx/issues/5265#issuecomment-612680524
@@ -19,7 +19,7 @@ spec:
             name: democart-frontend-service
             port:
               number: 3000
-  - host: api.helloworld.info
+  - host: api.democart.tech
     http:
       paths:
       - path: /?(.*)
@@ -29,7 +29,7 @@ spec:
             name: democart-backend-service
             port:
               number: 8000
-  - host: idp.helloworld.info
+  - host: idp.democart.tech
     http:
       paths:
       - path: /?(.*)
@@ -39,7 +39,7 @@ spec:
             name: democart-backend-service
             port:
               number: 8001
-  - host: prom.helloworld.info
+  - host: prom.democart.tech
     http:
       paths:
       - path: /?(.*)
@@ -49,7 +49,7 @@ spec:
             name: democart-prometheus-service
             port:
               number: 9000
-  - host: grafana.helloworld.info
+  - host: grafana.democart.tech
     http:
       paths:
       - path: /?(.*)

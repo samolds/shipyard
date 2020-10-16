@@ -19,15 +19,15 @@ minikube addons enable ingress
 
 ```sh
 MKIP=$(minikube ip)
-echo "$MKIP helloworld.info" | sudo tee -a /etc/hosts
-echo "$MKIP api.helloworld.info" | sudo tee -a /etc/hosts
-echo "$MKIP idp.helloworld.info" | sudo tee -a /etc/hosts
-echo "$MKIP prom.helloworld.info" | sudo tee -a /etc/hosts
-echo "$MKIP grafana.helloworld.info" | sudo tee -a /etc/hosts
+echo "$MKIP democart.tech" | sudo tee -a /etc/hosts
+echo "$MKIP api.democart.tech" | sudo tee -a /etc/hosts
+echo "$MKIP idp.democart.tech" | sudo tee -a /etc/hosts
+echo "$MKIP prom.democart.tech" | sudo tee -a /etc/hosts
+echo "$MKIP grafana.democart.tech" | sudo tee -a /etc/hosts
 
-echo "$MKIP api.helloworld.info" | minikube ssh -- sudo tee -a /etc/hosts
-echo "$MKIP idp.helloworld.info" | minikube ssh -- sudo tee -a /etc/hosts
-echo "$MKIP prom.helloworld.info" | minikube ssh -- sudo tee -a /etc/hosts
+echo "$MKIP api.democart.tech" | minikube ssh -- sudo tee -a /etc/hosts
+echo "$MKIP idp.democart.tech" | minikube ssh -- sudo tee -a /etc/hosts
+echo "$MKIP prom.democart.tech" | minikube ssh -- sudo tee -a /etc/hosts
 ```
 
 4. Test apply the K8s configurations
@@ -42,7 +42,7 @@ kubectl apply -f k8s/dev --dry-run --validate=true
 cd k8s/dev/scripts && ./apply_dev && cd ../../..
 ```
 
-6. Navigate to `http://helloworld.info` in a browser
+6. Navigate to `http://democart.tech` in a browser
 
 7. Delete cluster and all persistent volumes
 
@@ -63,20 +63,20 @@ minikube ssh -- sudo rm -rf /data/democart-db-data /data/democart-grafana-data
 
 ```sh
 vi /etc/hosts
-# remove helloworld.info references
+# remove democart.tech references
 minikube ssh
 vi /etc/hosts
-# remove helloworld.info references
+# remove democart.tech references
 ```
 
 
 ### Grafana
 
 To hook up Grafana to the Prometheus Server, add a new prometheus
-datasource in the Grafana dashboard (at http://grafana.helloworld.info). The first time
+datasource in the Grafana dashboard (at http://grafana.democart.tech). The first time
 you sign in, the credentials are admin:admin.
 
-Add http://prom.helloworld.info as the URL, and leave access as "Server". Then scroll down and click "Save and Test".
+Add http://prom.democart.tech as the URL, and leave access as "Server". Then scroll down and click "Save and Test".
 
 
 ### Other Useful Commands

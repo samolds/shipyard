@@ -27,9 +27,9 @@ data:
     idp_client_secret = "idp_client_secret"
     loglevel = "debug"
     developer_mode = true
-    client_hosts = ["http://helloworld.info"]
-    public_api_url = "http://api.helloworld.info"
-    public_idp_url = "http://idp.helloworld.info"
+    client_hosts = ["http://democart.tech"]
+    public_api_url = "http://api.democart.tech"
+    public_idp_url = "http://idp.democart.tech"
 
 ---
 
@@ -51,7 +51,7 @@ spec:
         #tier: backend
     spec:
       # to copy minikube hosts /etc/hosts to each pod (so that
-      # idp.helloworld.info can be resolved from within the pods)
+      # idp.democart.tech can be resolved from within the pods)
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
       containers:

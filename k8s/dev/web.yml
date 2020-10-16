@@ -5,7 +5,7 @@ metadata:
   name: democart-frontend-configmap
   namespace: dev
 data:
-  PUBLIC_API_URL: "http://api.helloworld.info"
+  PUBLIC_API_URL: "http://api.democart.tech"
 
 ---
 
