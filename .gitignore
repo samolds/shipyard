@@ -1,9 +1,11 @@
 go/pkg
 go/bin
-go/src/democart/democart
-web/client/build
+go/src/shipyard/shipyard
+web/shipyard/build
 node_modules
 *.sqlite3.db*
+dockercompose/monitor/grafana
+dockercompose/monitor/grafana_data
 
 k8s/*/*.secret.yml
 k8s/*/secret.yml

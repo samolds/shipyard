@@ -2,10 +2,10 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: democart-grafana-persistentvolume
+  name: shipyard-grafana-persistentvolume
   # persistentvolumes don't use namespace
   labels:
-    using-name: democart-grafana
+    using-name: shipyard-grafana
     using-namespace: dev
 spec:
   storageClassName: standard
@@ -14,7 +14,7 @@ spec:
   capacity:
     storage: 1Gi
   hostPath:
-    path: /data/democart-grafana-data
+    path: /data/shipyard-grafana-data
   # irl, this would be "Retain". otherwise, what's the point of the stateful
   # set?! this will essentially `rm -rf /volume/*` on the host machine
   persistentVolumeReclaimPolicy: Delete
@@ -26,12 +26,12 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: democart-grafana-persistentvolumeclaim
+  name: shipyard-grafana-persistentvolumeclaim
   namespace: dev
 spec:
   selector:
     matchLabels:
-      using-name: democart-grafana
+      using-name: shipyard-grafana
       using-namespace: dev
   storageClassName: standard
   accessModes:

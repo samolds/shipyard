@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: democart-db-configmap
+  name: shipyard-db-configmap
   namespace: dev
 data:
   POSTGRES_DB: dbconfigmapdb
@@ -17,40 +17,40 @@ data:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: democart-db-statefulset
+  name: shipyard-db-statefulset
   namespace: dev
   labels:
-    app: democart-db
+    app: shipyard-db
 spec:
-  serviceName: democart-db
+  serviceName: shipyard-db
   replicas: 1
   selector:
     matchLabels:
-      app: democart-db
+      app: shipyard-db
   #strategy:
   #  type: Recreate
   template:
     metadata:
       labels:
-        app: democart-db
+        app: shipyard-db
     spec:
       containers:
-      - name: democart-db-docker
+      - name: shipyard-db-docker
         image: postgres:11
         ports:
         - containerPort: 5432
         envFrom:
         - configMapRef:
-            name: democart-db-configmap
+            name: shipyard-db-configmap
         - secretRef:
-            name: democart-db-secret
+            name: shipyard-db-secret
         volumeMounts:
-        - name: democart-persistent-storage
+        - name: shipyard-persistent-storage
           mountPath: /var/lib/postgresql/data
       volumes:
-      - name: democart-persistent-storage
+      - name: shipyard-persistent-storage
         persistentVolumeClaim:
-          claimName: democart-db-persistentvolumeclaim
+          claimName: shipyard-db-persistentvolumeclaim
 
 ---
 
@@ -58,13 +58,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: democart-db-service
+  name: shipyard-db-service
   namespace: dev
   labels:
-    app: democart-db
+    app: shipyard-db
 spec:
   selector:
-    app: democart-db
+    app: shipyard-db
   # db is only available within the cluster
   type: ClusterIP
   ports:

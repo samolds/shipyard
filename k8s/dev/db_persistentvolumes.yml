@@ -2,10 +2,10 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: democart-db-persistentvolume
+  name: shipyard-db-persistentvolume
   # persistentvolumes don't use namespace
   labels:
-    using-name: democart-db
+    using-name: shipyard-db
     using-namespace: dev
 spec:
   storageClassName: standard
@@ -14,7 +14,7 @@ spec:
   capacity:
     storage: 1Gi
   hostPath:
-    path: /data/democart-db-data
+    path: /data/shipyard-db-data
   # irl, this would be "Retain". otherwise, what's the point of the stateful
   # set?! this will essentially `rm -rf /volume/*` on the host machine
   persistentVolumeReclaimPolicy: Delete
@@ -26,12 +26,12 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: democart-db-persistentvolumeclaim
+  name: shipyard-db-persistentvolumeclaim
   namespace: dev
 spec:
   selector:
     matchLabels:
-      using-name: democart-db
+      using-name: shipyard-db
       using-namespace: dev
   storageClassName: standard
   accessModes:

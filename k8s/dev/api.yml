@@ -2,11 +2,11 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: democart-backend-configmap
+  name: shipyard-backend-configmap
   namespace: dev
 data:
   DATABASE_DRIVER: "postgres"
-  DATABASE_HOST: "democart-db-service"
+  DATABASE_HOST: "shipyard-db-service"
   DATABASE_PORT: "5432"
   DATABASE_SSLMODE: "disable"
   DATABASE_NAME: "dbconfigmapdb"
@@ -14,7 +14,7 @@ data:
   DATABASE_PASSWORD: "dbconfigmappass"
 
   config.hcl: |
-    api_slug = "democart"
+    api_slug = "shipyard"
     api_addr = ":8080"
     idp_addr = ":8081"
     metric_addr = ":8082"
@@ -27,9 +27,9 @@ data:
     idp_client_secret = "idp_client_secret"
     loglevel = "debug"
     developer_mode = true
-    client_hosts = ["http://democart.tech"]
-    public_api_url = "http://api.democart.tech"
-    public_idp_url = "http://idp.democart.tech"
+    client_hosts = ["http://shipyard.tech"]
+    public_api_url = "http://api.shipyard.tech"
+    public_idp_url = "http://idp.shipyard.tech"
 
 ---
 
@@ -37,28 +37,28 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: democart-backend-deployment
+  name: shipyard-backend-deployment
   namespace: dev
 spec:
   selector:
     matchLabels:
-      app: democart-backend
+      app: shipyard-backend
       #tier: backend
   template:
     metadata:
       labels:
-        app: democart-backend
+        app: shipyard-backend
         #tier: backend
     spec:
       # to copy minikube hosts /etc/hosts to each pod (so that
-      # idp.democart.tech can be resolved from within the pods)
+      # idp.shipyard.tech can be resolved from within the pods)
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
       containers:
-      - name: democart-backend-docker
-        image: "samolds/democart-api:latest"
-        command: ["/usr/local/bin/entrypoint.sh", "/usr/local/bin/democart"]
-        args: ["--configs", "/etc/config/democart_backend/config.hcl,/etc/config/democart_backend/secrets.hcl"]
+      - name: shipyard-backend-docker
+        image: "samolds/shipyard-api:latest"
+        command: ["/usr/local/bin/entrypoint.sh", "/usr/local/bin/shipyard"]
+        args: ["--configs", "/etc/config/shipyard_backend/config.hcl,/etc/config/shipyard_backend/secrets.hcl"]
         ports:
         - containerPort: 8080
           name: api
@@ -88,30 +88,30 @@ spec:
           timeoutSeconds: 10
         envFrom:
         - configMapRef:
-            name: democart-backend-configmap
+            name: shipyard-backend-configmap
         - secretRef:
-            name: democart-backend-secret
+            name: shipyard-backend-secret
         env:
         - name: MY_POD_NAME
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
         volumeMounts:
-        - name: democart-backend-config
-          mountPath: /etc/config/democart_backend
+        - name: shipyard-backend-config
+          mountPath: /etc/config/shipyard_backend
           readOnly: true
       volumes:
-      - name: democart-backend-config
+      - name: shipyard-backend-config
         projected:
           sources:
           - configMap:
-              name: democart-backend-configmap
+              name: shipyard-backend-configmap
           - secret:
-              name: democart-backend-secret
+              name: shipyard-backend-secret
       initContainers:
-      - name: democart-backend-init-db
+      - name: shipyard-backend-init-db
         image: busybox
-        command: ['sh', '-c', 'until nc -z democart-db-service 5432; do echo waiting for db; sleep 2; done;']
+        command: ['sh', '-c', 'until nc -z shipyard-db-service 5432; do echo waiting for db; sleep 2; done;']
   # shouldn't be necessary with hpa
   #replicas: 3
   replicas: 1
@@ -127,11 +127,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: democart-backend-service
+  name: shipyard-backend-service
   namespace: dev
 spec:
   selector:
-    app: democart-backend
+    app: shipyard-backend
   type: LoadBalancer
   ports:
   - name: api
@@ -155,7 +155,7 @@ spec:
 #apiVersion: autoscaling/v1
 #kind: HorizontalPodAutoscaler
 #metadata:
-#  name: democart-backend-autoscaler
+#  name: shipyard-backend-autoscaler
 #  namespace: dev
 #spec:
 #  maxReplicas: 3
@@ -163,5 +163,5 @@ spec:
 #  scaleTargetRef:
 #    apiVersion: apps/v1
 #    kind: Deployment
-#    name: democart-backend-deployment
+#    name: shipyard-backend-deployment
 #  targetCPUUtilizationPercentage: 90

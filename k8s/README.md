@@ -19,15 +19,15 @@ minikube addons enable ingress
 
 ```sh
 MKIP=$(minikube ip)
-echo "$MKIP democart.tech" | sudo tee -a /etc/hosts
-echo "$MKIP api.democart.tech" | sudo tee -a /etc/hosts
-echo "$MKIP idp.democart.tech" | sudo tee -a /etc/hosts
-echo "$MKIP prom.democart.tech" | sudo tee -a /etc/hosts
-echo "$MKIP grafana.democart.tech" | sudo tee -a /etc/hosts
+echo "$MKIP shipyard.tech" | sudo tee -a /etc/hosts
+echo "$MKIP api.shipyard.tech" | sudo tee -a /etc/hosts
+echo "$MKIP idp.shipyard.tech" | sudo tee -a /etc/hosts
+echo "$MKIP prom.shipyard.tech" | sudo tee -a /etc/hosts
+echo "$MKIP grafana.shipyard.tech" | sudo tee -a /etc/hosts
 
-echo "$MKIP api.democart.tech" | minikube ssh -- sudo tee -a /etc/hosts
-echo "$MKIP idp.democart.tech" | minikube ssh -- sudo tee -a /etc/hosts
-echo "$MKIP prom.democart.tech" | minikube ssh -- sudo tee -a /etc/hosts
+echo "$MKIP api.shipyard.tech" | minikube ssh -- sudo tee -a /etc/hosts
+echo "$MKIP idp.shipyard.tech" | minikube ssh -- sudo tee -a /etc/hosts
+echo "$MKIP prom.shipyard.tech" | minikube ssh -- sudo tee -a /etc/hosts
 ```
 
 4. Test apply the K8s configurations
@@ -42,41 +42,41 @@ kubectl apply -f k8s/dev --dry-run --validate=true
 cd k8s/dev/scripts && ./apply_dev && cd ../../..
 ```
 
-6. Navigate to `http://democart.tech` in a browser
+6. Navigate to `http://shipyard.tech` in a browser
 
 7. Delete cluster and all persistent volumes
 
 ```sh
 # persitent volumes (pv) aren't namespace scoped. delete manually
 kubectl delete namespaces dev
-kubectl delete pv democart-db-persistentvolume
-kubectl delete pv democart-grafana-persistentvolume
+kubectl delete pv shipyard-db-persistentvolume
+kubectl delete pv shipyard-grafana-persistentvolume
 ```
 
 8. Delete statefully persistent db data on host node
 
 ```sh
-minikube ssh -- sudo rm -rf /data/democart-db-data /data/democart-grafana-data
+minikube ssh -- sudo rm -rf /data/shipyard-db-data /data/shipyard-grafana-data
 ```
 
 9. Cleanup Hosts
 
 ```sh
 vi /etc/hosts
-# remove democart.tech references
+# remove shipyard.tech references
 minikube ssh
 vi /etc/hosts
-# remove democart.tech references
+# remove shipyard.tech references
 ```
 
 
 ### Grafana
 
 To hook up Grafana to the Prometheus Server, add a new prometheus
-datasource in the Grafana dashboard (at http://grafana.democart.tech). The first time
+datasource in the Grafana dashboard (at http://grafana.shipyard.tech). The first time
 you sign in, the credentials are admin:admin.
 
-Add http://prom.democart.tech as the URL, and leave access as "Server". Then scroll down and click "Save and Test".
+Add http://prom.shipyard.tech as the URL, and leave access as "Server". Then scroll down and click "Save and Test".
 
 
 ### Other Useful Commands
@@ -84,7 +84,7 @@ Add http://prom.democart.tech as the URL, and leave access as "Server". Then scr
 Get shell access to the pods
 
 ```sh
-kubectl --namespace=dev exec --stdin --tty <pod> -- /bin/bash
+kubectl --namespace=dev exec --stdin --tty <full_pod_name> -- /bin/bash
 ```
 
 

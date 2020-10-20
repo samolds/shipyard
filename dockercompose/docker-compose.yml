@@ -1,0 +1,117 @@
+version: "3.7"
+
+services:
+
+  api:
+    container_name: shipyard_api
+    image: samolds/shipyard-api:latest
+    build:
+      context: ../go/src/shipyard
+      dockerfile: Dockerfile
+      args:
+        VERSION: "${VERSION:-dev}"
+    ports:
+      - "8000:8080" # host:container
+      - "8081:8081" # the same because api comms with idp within the container
+    expose: # expose only to other services, and not host machine
+      - "8082"
+    depends_on:
+      - db
+    environment: # TODO(sam): better secret management. use env_file?
+      DATABASE_DRIVER: postgres
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_SSLMODE: disable
+      DATABASE_USER: shipyard
+      DATABASE_PASSWORD: shipyardpass
+      DATABASE_NAME: shipyard
+      PUBLIC_API_URL: "http://localhost:8000"
+      PUBLIC_IDP_URL: "http://localhost:8081"
+      CLIENT_HOSTS:   "http://localhost:3000"
+    restart: unless-stopped
+
+  db: # TODO(sam): remove for prod and replace with rds
+    container_name: shipyard_db
+    image: postgres:11
+    restart: always
+    environment: # TODO(sam): better secret management. use env_file?
+      POSTGRES_DB: shipyard
+      POSTGRES_USER: shipyard
+      POSTGRES_PASSWORD: shipyardpass
+    expose: # expose only to other services, and not host machine
+      - "5432"
+    volumes: # remove volume to not persist data between containerizations
+      - postgres_data:/var/lib/postgresql/data/
+
+  web:
+    container_name: shipyard_web
+    image: samolds/shipyard-web:latest
+    build:
+      context: ../web/shipyard
+      dockerfile: Dockerfile
+    environment:
+      PUBLIC_API_URL: "http://localhost:8000"
+    ports:
+      - "3000:80"
+
+  grafana:
+    container_name: shipyard_grafana
+    image: grafana/grafana
+    ports:
+      - "5000:3000"
+    environment:
+      GF_SERVER_HTTP_PORT: "3000"
+    volumes:
+      - ./monitor/grafana_data:/var/lib/grafana
+      - ./monitor/grafana/provisioning/:/etc/grafana/provisioning/
+    restart: always
+
+  prometheus:
+    container_name: shipyard_prometheus
+    image: prom/prometheus:v2.1.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitor/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prom/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+
+#  nginx_proxy:
+#    build: ./nginx
+#    container_name: shipyard_nginx_proxy
+#    restart: always
+#    ports:
+#      - 443:443
+#      - 80:80
+#    depends_on:
+#      - api
+#    volumes:
+#      - assets_volume:/usr/shipyard/go/src/shipyard/static/assets
+#      - filestore_volume:/usr/shipyard/go/src/shipyard/static/filestore
+#      - certs:/etc/nginx/certs
+#      - html:/usr/share/nginx/html
+#      - vhost:/etc/nginx/vhost.d
+#      - /var/run/docker.sock:/tmp/docker.sock:ro
+#
+#  nginx_proxy_letsencrypt:
+#    container_name: shipyard_nginx_proxy_letsencrypt
+#    image: jrcs/letsencrypt-nginx-proxy-companion
+#    environment:
+#      DEFAULT_EMAIL: youremail@yourdomain.com
+#      NGINX_PROXY_CONTAINER: nginx_proxy
+#    volumes:
+#      - /var/run/docker.sock:/var/run/docker.sock:ro
+#      - certs:/etc/nginx/certs
+#      - html:/usr/share/nginx/html
+#      - vhost:/etc/nginx/vhost.d
+#    depends_on:
+#      - nginx_proxy
+
+volumes:
+  postgres_data:
+  #assets_volume:
+  #filestore_volume:
+  #certs:
+  #html:
+  #vhost:

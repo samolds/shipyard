@@ -2,10 +2,10 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: democart-frontend-configmap
+  name: shipyard-frontend-configmap
   namespace: dev
 data:
-  PUBLIC_API_URL: "http://api.democart.tech"
+  PUBLIC_API_URL: "http://api.shipyard.tech"
 
 ---
 
@@ -13,27 +13,27 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: democart-frontend-deployment
+  name: shipyard-frontend-deployment
   namespace: dev
 spec:
   selector:
     matchLabels:
-      app: democart-frontend
+      app: shipyard-frontend
       #tier: frontend
   template:
     metadata:
       labels:
-        app: democart-frontend
+        app: shipyard-frontend
         #tier: frontend
     spec:
       containers:
-      - name: democart-frontend-docker
-        image: "samolds/democart-web:latest"
+      - name: shipyard-frontend-docker
+        image: "samolds/shipyard-web:latest"
         ports:
         - containerPort: 80 # the port the container is listening on
         envFrom:
         - configMapRef:
-            name: democart-frontend-configmap
+            name: shipyard-frontend-configmap
   # shouldn't be necessary with hpa
   #replicas: 3
   replicas: 1
@@ -49,11 +49,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: democart-frontend-service
+  name: shipyard-frontend-service
   namespace: dev
 spec:
   selector:
-    app: democart-frontend
+    app: shipyard-frontend
   type: LoadBalancer
   ports:
   - name: http
@@ -69,7 +69,7 @@ spec:
 #apiVersion: autoscaling/v1
 #kind: HorizontalPodAutoscaler
 #metadata:
-#  name: democart-frontend-autoscaler
+#  name: shipyard-frontend-autoscaler
 #  namespace: dev
 #spec:
 #  maxReplicas: 3
@@ -77,5 +77,5 @@ spec:
 #  scaleTargetRef:
 #    apiVersion: apps/v1
 #    kind: Deployment
-#    name: democart-frontend-deployment
+#    name: shipyard-frontend-deployment
 #  targetCPUUtilizationPercentage: 90

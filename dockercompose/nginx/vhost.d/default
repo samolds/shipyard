@@ -1,0 +1,9 @@
+location /assets/ {
+  alias /var/lib/shipyard/static/assets/;
+  add_header Access-Control-Allow-Origin *;
+}
+
+location /filestore/ {
+  alias /var/lib/shipyard/static/filestore/;
+  add_header Access-Control-Allow-Origin *;
+}

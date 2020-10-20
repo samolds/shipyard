@@ -1,72 +1,72 @@
-# Democart
+# Shipyard
 
-Under construction. Possibly renaming to Leaven?
+This is my knowledge repo for containerized, scalable, monitored, and generally
+production ready web services.
 
-This is my Sourdough Starter for containerized services - primarily K8s
-orchestrated Dockerized Go API Servers with Postgres. As my understanding of
-these services grow and I learn new things, I plan to add back to this repo
-with better practices and more idiomatic methods. I also plan to use bits from
-this repo as I build other projects.
+The main components:
+- A JSON RESTful API server, in Go
+- A rudimentary and insecure identity provider, in Go
+- A simple (and poorly styled) ReactJS web dashboard frontend
+- A docker-compose config to coordinate the full system, with the addition of a
+  Postgres database, a Prometheus server, and a Grafana server
+- A Kubernetes config to orchestrate the full system, with the addition of a
+  Postgres database, a Prometheus server, and a Grafana server
 
-
-### About
-
-This is an exercise in orchestrating various production grade services. It
-consists of 3 basic components - an API server, an IDP, and a frontend, in
-addition to a database and a metric collection service. The three basic
-components can easily be stood up locally. Support for K8s and Docker Compose
-allows for the entire cluster to spin up easily.
-
-There are 3 ways to standup this project:
-1. Running the API binary locally and serving the frontend with dev react
-2. Using docker-compose to build and run each Docker container
-3. Using K8s to spin up a local Minikube cluster
+As my understanding of these services grow and I learn new things, I plan to
+add back to this repo with better practices and more idiomatic methods so that
+it may be a point of reference for me, myself, and I.
 
 
-### Old About
+## Ship It
 
-This is an exercise in building a modular and containerized Shopping Cart
-service. It consists of 3 main components:
-
-1. A backend REST API, written in Go.
-2. An identity provider, written in Go.
-3. A frontend marketplace, using ReactJS.
-
-The backend REST API and the identity provider are both running on the same
-host for simplicity, but they could easily be broken out. They are both located
-in `go/src/democart`.  
-The frontend marketplace is located in `web/democart`.
+There are currently 3 ways to stand up this project:
+1. Manually.
+2. Using docker-compose to build and run each Dockerized container
+3. Using K8s with Minikube to run everything on a single node.
 
 
-### Dependencies
-
-- docker
-
-
-### Building From Scratch and Running Locally
+### 1 - Serving Manually
 
 ```sh
-make new
+cd go/src/shipyard && make build-no-dbx && cd ../../..
+cd web/shipyard && make build && cd ../..
 ```
 
+You'll then need to manage how you run and connect your shipyard API binary,
+the web build, the database, and any potential monitoring.
 
-### Running Locally
+
+### 2 - Serving with docker-compose
 
 ```sh
-make up
+cd dockercompose && make build up
 ```
 
+The default configuration will serve:
+- The web frontend at [localhost:3000](http://localhost:3000)
+- The backend API at [localhost:8000](http://localhost:8000)
+- The Grafana metrics dashboard at [localhost:5000](http://localhost:5000)
 
-### Start a Quick'n'Dirty Dev Server
+
+### 3 - Serving with Kubernetes and Minikube
 
 ```sh
-make devup
+# 1. make sure minikube is running
+# 2. make sure necessary hosts are added to /etc/hosts on host machine and the
+#    host minikube node (check k8s/README.md for more details)
+cd k8s && make applydev
 ```
 
+The default configuration will serve:
+- The web frontend at [shipyard.tech](http://shipyard.tech)
+- The backend API at [api.shipyard.tech](http://api.shipyard.tech)
+- The Grafana metrics dashboard at
+  [grafana.shipyard.tech](http://grafana.shipyard.tech)
 
-### How to Use
 
-- Go to [localhost:3000](http://localhost:3000) in a browser.
+## How to Use
+
+- Go to the web dashboard
 - "Sign Up" to create a new user
 - "Make Dummy Address"
 - "Make Dummy Item"
@@ -75,93 +75,36 @@ make devup
 - Add the item to your cart again
 - Order the items in your cart
 - Logout
-- See the Dummy items in the marketplace
+- See the Dummy items in the marketplace and no cart
 
 
-### TODOs
+## Known Weak Points (TODOs)
 
-- ~~Use main.go style from demoapi in democart~~
-- ~~Better configuration handling between psql secrets and server config file
-  using config from demoapi~~
-- ~~Finish off basic K8s stuff with working example. commit branch. merge. Start
-  go backend cleanup~~
-- ~~Add demoapi grafana/prometheus server~~
-- ~~Use Dockerfile template from demoapi in democart~~
-- ~~Break out idp to separate server entirely.~~
-- ~~Essentially, clean up democart to use some of the more elogant demoapi stuff,
-  but with all the functionality of democart~~
-- Rename Democart to API Server Stencil or something else. Something like:
-   - Levain
-   - API Starter
-   - Template
-   - K8s Server Template
-   - Prod Server
-   - Server Build
-   - Server Foundation
-   - API Foundation
-   - Prod API Base
-   - Sam Base
-   - API Base
-   - Base Layer
-   - API Thermal Layer
-- K8s configuration stuff:
-   - ~~Add namespacing metadata~~
-   - ~~Add rollingupdate strategy~~
-   - Add better labels/selectors - app, tier, env, release, etc
-- ~~Get Prometheus/Grafana metrics serving in K8s minikube~~
-- Clean up fake idp stuff. See if swapping out for Auth0 works.
-- ~~Use demoapi's `entrypoint.sh` instead of `wait_for_psql.sh`~~
-- ~~Clean up docker-compose stuff so that works in addition to k8s stuff~~
-- Stop using DBX
-- Figure out "failed to sync configmap cache: timed out waiting for the
-  condition" occasional error
-- Better pod DNS:
-    https://kubernetes.io/docs/concepts/services-networking/dns-pod-service
-- More unit tests
-- Better documentation
-- More graceful error handling
-- Stylize the frontend better
-- Production-ify with nginx, letsencrypt, K8s, and managed RDS db
-- ~~Change helloworld.info k8s host to something better~~
-- ~~Do better git ref version in makefiles~~
-- Can DNS stuff be done better by using the FQDN everywhere?
-- Look into Helm charts
+- No SSL support yet. TODO = setup LetsEncrypt bot for docker-compose and K8s.
+- The backend API src uses a handful of custom built tools that are essentially
+  boiler plate. I would like to be able to easily reuse and improve these
+  boiler plate tools. They should be broken out into their own library.
+- The database is included in the docker-compose and K8s configurations for
+  simplicity. IRL, the DB would live outside the cluster.
+- There is no support for file serving.
+- The Go database layer is using [DBX](https://github.com/spacemonkeygo/dbx),
+  which seems to be unmaintained and is currently failing to build. A better
+  database ORM should be used instead.
+- The `idp` Go package was build ad-hoc. It's expected that it can be replaced
+  entirely with a real auth service, like [Auth0](https://auth0.com), but this
+  needs to be tested.
+- The K8s recipes should make better use of labels and selectors to organize
+  services and ease command line instructions. Use things like `app`, `tier`,
+  `env`, `release`, etc.
+- In the K8s cluster, he Prometheus and Grafana services could potentially
+  leverage Helm charts. But I am unfamiliar with Helm, at the moment.
+- In the K8s cluster, the service DNS could be handled better - instead of
+  adding hostnames to /etc/hosts. Look into using the FQDNs.
 
 
-### Notes
+## Useful Links/Ideas/Notes:
 
-- docker-compose.yml is useful to build the project during development
-- K8s is a more production ready solution.
-  - K8s components of this project:
-    - A deployment for the backend api
-    - A deployment for the frontend app
-    - A deployment for the database (normally, this is outside the cluster)
-    - A service exposing the backend api publicly (load balanced) (NodePort)
-    - A service exposing the frontend publicly (load balanced) (NodePort)
-    - A service exposing the database to only the backend nodes (ClusterIP)
-    - A persistent volume to persist database data
-    - A horizontal pod autoscaler for the backend
-    - A horizontal pod autoscaler for the frontend
-    - An Ingress routing frontend and backend traffic??
-    - A config map for backend
-    - A config map for frontend
-
-
-### Useful Links/Ideas/Notes:
-- "Connecting a frontend to a backend"
-  - https://kubernetes.io/docs/tasks/access-application-cluster/connecting-frontend-backend
-  - It looks like it's using nginx within the frontend pods to find the backend service
-- Kompose
-  - https://github.com/kubernetes/kompose/blob/master/README.md#installation
-  - A command line tool to convert docker-compose yaml to kubernetes templates
-- A "How To" to convert a docker-compose to prod ready k8s
-  - https://www.digitalocean.com/community/tutorials/how-to-migrate-a-docker-compose-workflow-to-kubernetes
-- Does democart need to have hosted docker images?? or can they be local??
-  - https://hub.docker.com/repository/docker/samolds/democart
 - How to use local docker images with a minikube cluster
-  - https://medium.com/bb-tutorials-and-thoughts/how-to-use-own-local-doker-images-with-minikube-2c1ed0b0968
-- Connecting to a localhost-running db or service from docker
-  - https://docs.docker.com/docker-for-mac/networking/#use-cases-and-workarounds
-  - https://stackoverflow.com/q/49289009
+  https://medium.com/bb-tutorials-and-thoughts/how-to-use-own-local-doker-images-with-minikube-2c1ed0b0968
 - Mapping to external services, like communicating with an external db
-  - https://cloud.google.com/blog/products/gcp/kubernetes-best-practices-mapping-external-services
+  https://cloud.google.com/blog/products/gcp/kubernetes-best-practices-mapping-external-services

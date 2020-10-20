@@ -2,13 +2,13 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: democart-ingress
+  name: shipyard-ingress
   namespace: dev
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$1
 spec:
   rules:
-  - host: democart.tech
+  - host: shipyard.tech
     http:
       paths:
       # https://github.com/kubernetes/ingress-nginx/issues/5265#issuecomment-612680524
@@ -16,46 +16,46 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: democart-frontend-service
+            name: shipyard-frontend-service
             port:
               number: 3000
-  - host: api.democart.tech
+  - host: api.shipyard.tech
     http:
       paths:
       - path: /?(.*)
         pathType: Prefix
         backend:
           service:
-            name: democart-backend-service
+            name: shipyard-backend-service
             port:
               number: 8000
-  - host: idp.democart.tech
+  - host: idp.shipyard.tech
     http:
       paths:
       - path: /?(.*)
         pathType: Prefix
         backend:
           service:
-            name: democart-backend-service
+            name: shipyard-backend-service
             port:
               number: 8001
-  - host: prom.democart.tech
+  - host: prom.shipyard.tech
     http:
       paths:
       - path: /?(.*)
         pathType: Prefix
         backend:
           service:
-            name: democart-prometheus-service
+            name: shipyard-prometheus-service
             port:
               number: 9000
-  - host: grafana.democart.tech
+  - host: grafana.shipyard.tech
     http:
       paths:
       - path: /?(.*)
         pathType: Prefix
         backend:
           service:
-            name: democart-grafana-service
+            name: shipyard-grafana-service
             port:
               number: 5000

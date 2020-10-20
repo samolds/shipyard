@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: democart-prometheus-configmap
+  name: shipyard-prometheus-configmap
   namespace: dev
 data:
   prometheus.yml: |
@@ -12,11 +12,11 @@ data:
     #  static_configs:
     #  - targets: ["localhost:9090"]
 
-    - job_name: "democart_backend_metrics"
+    - job_name: "shipyard_backend_metrics"
       metrics_path: "/metrics"
       scrape_interval: 1s # originally 5s
       static_configs:
-        - targets: ["democart-backend-service:8002"]
+        - targets: ["shipyard-backend-service:8002"]
 
 ---
 
@@ -24,32 +24,32 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: democart-prometheus-deployment
+  name: shipyard-prometheus-deployment
   namespace: dev
 spec:
   selector:
     matchLabels:
-      app: democart-prometheus
+      app: shipyard-prometheus
   template:
     metadata:
       labels:
-        app: democart-prometheus
+        app: shipyard-prometheus
     spec:
       containers:
-      - name: democart-prometheus-docker
+      - name: shipyard-prometheus-docker
         image: prom/prometheus
         ports:
         - containerPort: 9090
         volumeMounts:
-        - name: democart-prometheus-config
+        - name: shipyard-prometheus-config
           mountPath: /etc/prometheus/
           readOnly: true
       volumes:
-      - name: democart-prometheus-config
+      - name: shipyard-prometheus-config
         projected:
           sources:
           - configMap:
-             name: democart-prometheus-configmap
+             name: shipyard-prometheus-configmap
   replicas: 1
 
 ---
@@ -58,11 +58,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: democart-prometheus-service
+  name: shipyard-prometheus-service
   namespace: dev
 spec:
   selector:
-    app: democart-prometheus
+    app: shipyard-prometheus
   type: LoadBalancer
   ports:
   - name: http

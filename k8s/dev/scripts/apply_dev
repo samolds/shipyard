@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # TODO(sam): add a context
-#ARGS="--context=democart --namespace=dev"
+#ARGS="--context=shipyard --namespace=dev"
 ARGS="--namespace=dev"
 
 # some of the k8s resources need to be created before others

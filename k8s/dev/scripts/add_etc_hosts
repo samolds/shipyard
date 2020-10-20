@@ -1,15 +1,17 @@
 #!/bin/bash
 
+set -e
+
 MKIP=$(minikube ip)
-echo "$MKIP democart.tech" | tee -a /etc/hosts
-echo "$MKIP api.democart.tech" | tee -a /etc/hosts
-echo "$MKIP idp.democart.tech" | tee -a /etc/hosts
-echo "$MKIP prom.democart.tech" | tee -a /etc/hosts
-echo "$MKIP grafana.democart.tech" | tee -a /etc/hosts
+echo "$MKIP shipyard.tech" | tee -a /etc/hosts
+echo "$MKIP api.shipyard.tech" | tee -a /etc/hosts
+echo "$MKIP idp.shipyard.tech" | tee -a /etc/hosts
+echo "$MKIP prom.shipyard.tech" | tee -a /etc/hosts
+echo "$MKIP grafana.shipyard.tech" | tee -a /etc/hosts
 
 # necessary for CORS between frontend and backend
-echo "$MKIP api.democart.tech" | minikube ssh -- sudo tee -a /etc/hosts
+echo "$MKIP api.shipyard.tech" | minikube ssh -- sudo tee -a /etc/hosts
 # necessary during token exchange between api and idp during login/signup
-echo "$MKIP idp.democart.tech" | minikube ssh -- sudo tee -a /etc/hosts
+echo "$MKIP idp.shipyard.tech" | minikube ssh -- sudo tee -a /etc/hosts
 # necessary for grafana to pull from prometheus server
-echo "$MKIP prom.democart.tech" | minikube ssh -- sudo tee -a /etc/hosts
+echo "$MKIP prom.shipyard.tech" | minikube ssh -- sudo tee -a /etc/hosts

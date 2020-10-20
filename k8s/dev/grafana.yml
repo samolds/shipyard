@@ -2,23 +2,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: democart-grafana-deployment
+  name: shipyard-grafana-deployment
   namespace: dev
 spec:
   selector:
     matchLabels:
-      app: democart-grafana
+      app: shipyard-grafana
   template:
     metadata:
       labels:
-        app: democart-grafana
+        app: shipyard-grafana
     spec:
       # to copy minikube hosts /etc/hosts to each pod (so that
-      # prom.democart.tech can be resolved from within the pods)
+      # prom.shipyard.tech can be resolved from within the pods)
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
       containers:
-      - name: democart-grafana-docker
+      - name: shipyard-grafana-docker
         image: grafana/grafana
         ports:
         - containerPort: 3000
@@ -31,12 +31,12 @@ spec:
         securityContext: # TODO(sam): review this! add to other deployments?
           runAsUser: 0 # bad. don't do this
         volumeMounts:
-        - name: democart-grafana-persistent-storage
+        - name: shipyard-grafana-persistent-storage
           mountPath: /var/lib/grafana
       volumes:
-      - name: democart-grafana-persistent-storage
+      - name: shipyard-grafana-persistent-storage
         persistentVolumeClaim:
-          claimName: democart-grafana-persistentvolumeclaim
+          claimName: shipyard-grafana-persistentvolumeclaim
   replicas: 1
 
 ---
@@ -45,11 +45,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: democart-grafana-service
+  name: shipyard-grafana-service
   namespace: dev
 spec:
   selector:
-    app: democart-grafana
+    app: shipyard-grafana
   type: LoadBalancer
   ports:
   - name: http
